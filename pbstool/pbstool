@@ -102,7 +102,8 @@ class InitEnv:
         elif 'titan' in hostname:
             self._host = 'Titan'
         else:
-            print 'Unknow host, exit.\n'
+            self._host = hostname
+            print 'Warning: Unknown host.'
 
     def get_host(self):
         return self._host
@@ -365,14 +366,13 @@ class ConfParser:
             msg = "Error: %s input file %s not found, exit."%(exename, exeinput)
             self.setting_error(msg)
 
-        check_exeinput(exename, exeinput)
+        self.check_exeinput(exename, exeinput)
 
-    def check_exeinput(exename, exeinput):
+    def check_exeinput(self, exename, exeinput):
         if exename == "RMG":
             in_args = RmgIn(exeinput)
         elif exename == 'qe':
             in_args = QeIn(exeinput)
-#EXEPATH     = /software/user_tools/current/cades-virtues/apps/quantum-espresso/intel/espresso/5.4.0/pw.x
 
     def validate_exeoutput(self):
         exeoutput = self._params['exeoutput']
