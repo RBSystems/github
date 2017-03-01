@@ -196,7 +196,7 @@ class ConfParser:
         if _param['required'] and val == _param['default']:
             msg = "Error: required tags %s not found."% key.upper()
             self.setting_error(msg)
-#consider canceling this part, check mandatory part one by one manually TODO
+        #consider canceling this part, check mandatory part one by one manually TODO
         if key == 'cores':
             self._set_cores(val)
         elif key == 'name':
@@ -371,6 +371,7 @@ class ConfParser:
     def check_exeinput(self, exename, exeinput):
         if exename == "RMG":
             in_args = RmgIn(exeinput)
+            validate_rmgin(in_args)
         elif exename == 'qe':
             in_args = QeIn(exeinput)
 

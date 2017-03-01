@@ -1,3 +1,6 @@
+import os
+import sys
+
 class RmgIn:
     def __init__(self, filename):
         self._set_methods = {'a_length': self._set_a_length,
@@ -21,9 +24,11 @@ class RmgIn:
         self._args = {}
 
         self.read_file(filename)
-        print self._in
         self._arg_parser()
-        print self._args
+
+    def setting_error(self, msg):
+        print msg
+        sys.exit(1)
 
     # TODO: need to find a better solution
     def read_file(self, filename):
@@ -48,7 +53,8 @@ class RmgIn:
                     while True:
                         i += 1
                         tmp = lines_in[i].strip().strip('"').strip("'")
-                        right_all.append(tmp)
+                        if tmp != '':
+                            right_all.append(tmp)
                         if '"' in lines_in[i] or "'" in lines_in[i]:
                             break
                     _in[left] = right_all
@@ -81,7 +87,7 @@ class RmgIn:
                 self._set_other(key, val)
     # TODO: need to be improved
     def _set_other(self, key, val):
-        self._args[key] = str(val)
+        self._args[key] = val
 
     def _set_a_length(self, val):
         self._args['a_length'] = float(val)
@@ -115,6 +121,22 @@ class RmgIn:
     def _set_start_mode(self, val):
         self._args['start_mode'] = str(val)
 
+    def validate_subdiag_driver(self):
+        _subdiag_driver = self._args['subdiag_driver']
+        if _subdiag_driver != 'scalapack':
+            print "Warning: A non-scalapck subdiag driver is used."
+
     def validate_pp(self):
         _pp = self._args['pseudopotential']
-        print _pp
+        for _tmp in _pp:
+            element, pp_path = _tmp.split()
+            if element != os.path.basename(pp_path).split('.')[0]:
+                msg = "Pseudo potential doesnot match for element %s, exit."% element
+                self.setting_error(msg)
+            if not os.path.isfile(pp_path):
+                msg = "Pseudo potential file: %s not found, exit."% pp_path
+                self.setting_error(msg)
+
+def validate_rmgin(args):
+    args.validate_pp()
+    args.validate_subdiag_driver()
