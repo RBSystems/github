@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -q batch
+#PBS -V
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=32
+#PBS -N test-32
+#PBS -j oe
+
+G09=/software/user_tools/current/cades-virtues/apps/gaussian/g09/g09
+export OMP_NUM_THREADS=1
+export GAUSS_EXEDIR=/software/user_tools/current/cades-virtues/apps/gaussian/g09/
+
+cd $PBS_O_WORKDIR
+
+date
+mpirun -np 32 --mca btl ^tcp $G09 toluene.com
+
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -q batch
+#PBS -V
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=32
+#PBS -N cp2k
+#PBS -j oe
+
+module load cp2k/svn20160613
+
+cd $PBS_O_WORKDIR
+
+mpirun -np 32 $CP2K_POPT_EXE opt.inp > output
+
+
