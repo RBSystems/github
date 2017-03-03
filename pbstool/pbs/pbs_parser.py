@@ -1,3 +1,5 @@
+import os
+from pbs_confs import *
 
 # add set and get functions here, cause it may be modified
 class ConfParser:
@@ -203,7 +205,7 @@ class ConfParser:
         rmg_exe_list = ['rmg-cpu']
         qe_exe_list = ['pw.x', 'phon']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
-        exepath  = pbs_conf._params['exepath']
+        exepath  = self._params['exepath']
         exename  = os.path.basename(exepath)
         if not os.path.isfile(exepath):
             msg = "Error: Executable %s does not exist, exit."% exepath

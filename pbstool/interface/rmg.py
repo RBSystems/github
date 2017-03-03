@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 
 class RmgIn:
     def __init__(self, filename):
@@ -127,6 +128,9 @@ class RmgIn:
             print "Warning: A non-scalapck subdiag driver is used."
 
     def validate_pp(self):
+        if 'pseudopotential' not in self._args:
+            return
+
         _pp = self._args['pseudopotential']
         for _tmp in _pp:
             element, pp_path = _tmp.split()
@@ -137,9 +141,36 @@ class RmgIn:
                 msg = "Pseudo potential file: %s not found, exit."% pp_path
                 self.setting_error(msg)
 
+    def validate_spacing(self):
+        sys.path.append('..')
+        
+        _wfc_grid = self._args['wavefunction_grid']
+        _units = self._args['crds_units']
+        _lat_vec = [self._args['a_length'],
+                    self._args['b_length'],
+                    self._args['c_length']]
+        if _units.lower() == 'bohr':
+            factor = 1.0
+        elif _units.lower() == 'angstrom':
+            factor = __import__('units').length().get_angstrom2bohr()
+        else:
+            msg = "Error: Unknown units type %s, exit."% _units.upper()
+            self.setting_error(msg)
+
+        spacing = np.divide(_lat_vec, _wfc_grid)*factor
+
+        if max(spacing) > 0.4 or min(spacing) < 0.1:
+            print "Warning: spacing may be set too large or too small."
+
+        _aniso = max(spacing)/min(spacing)
+        if _aniso > 1.1:
+            msg = "Error: anisotropy %.3f is too large, exit."% _aniso
+            self.setting_error(msg)
+
     def validate_others(self):
         pass
 
 def validate_rmgin(args):
     args.validate_pp()
+    args.validate_spacing()
     args.validate_subdiag_driver()
