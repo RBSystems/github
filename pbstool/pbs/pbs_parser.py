@@ -379,7 +379,7 @@ def write_pbs(init_env, pbs_conf):
         lines_pbs += "date\n"
         lines_pbs += "\n"
         if exename == 'RMG':
-            lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s\n"% pbs_dict
+            lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s > %(exeoutput)s\n"% pbs_dict
         elif exename == 'QE':
             lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s < %(exeinput)s > %(exeoutput)s\n"% pbs_dict
         elif exename == 'VASP':
@@ -423,7 +423,7 @@ def write_pbs(init_env, pbs_conf):
         lines_pbs += "date\n"
         lines_pbs += "\n"
         if exename == "RMG":
-            lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s %(exeinput)s\n"% pbs_dict
+            lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s %(exeinput)s > %(exeoutput)s\n"% pbs_dict
         elif exename == 'QE':
             lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s < %(exeinput)s > %(exeoutput)s\n"% pbs_dict
         elif exename == 'VASP':
