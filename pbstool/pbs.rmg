@@ -19,6 +19,6 @@ cd /home/z8j/github/pbstool
 
 date
 
-mpirun -np 256 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu rmg.in
+mpirun -np 256 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu rmg.in > rmg.00.out
 
 date

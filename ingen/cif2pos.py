@@ -111,7 +111,7 @@ def atominfo(cif):
                 if cif[j].strip()[0] == '_':
                     loopinfo.append(cif[j].strip())
                 else:
-                    atominfo.append(cif[j].strip())
+                    atominfo.append(cif[j].strip().replace('(','').replace(')',''))
         # debug
         # print 'ttt'
         # print loopinfo
@@ -131,8 +131,9 @@ def atominfo(cif):
         it = loopinfo.index('_atom_site_type_symbol')
     except:
         typesym = False
-        
+
     atomtmp = [a.split() for a in atominfo]
+    print atominfo, atomtmp
     label = []
     ato = []
     symbol = []
@@ -162,11 +163,11 @@ def atominfo(cif):
 def lattice(cif):
     for item in cif:
         if "_cell_length_a" in item:
-            a = float(item.split()[1])
+            a = float(item.split()[1].replace('(','').replace(')',''))
         if "_cell_length_b" in item:
-            b = float(item.split()[1])
+            b = float(item.split()[1].replace('(','').replace(')',''))
         if "_cell_length_c" in item:
-            c = float(item.split()[1])
+            c = float(item.split()[1].replace('(','').replace(')',''))
         if "_cell_angle_alpha" in item:
             alpha = float(item.split()[1])/180*m.pi
         if "_cell_angle_beta" in item:

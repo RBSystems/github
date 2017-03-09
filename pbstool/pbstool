@@ -186,6 +186,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     init_env = InitEnv()
+    os.system('export PYTHONPATH=$PYTHONPATH:%s'% init_env.get_pwd())
+
     pbs_conf = ConfParser(filename)
     # print pbs_conf._params
     validate_params(pbs_conf, init_env)
