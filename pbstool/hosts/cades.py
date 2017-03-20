@@ -1,4 +1,6 @@
-def get_pbs_lines(pbs_conf, pbs_dict):
+def get_pbs_lines(pbs_dict):
+    exename = pbs_dict['exename']
+
     lines_pbs = ""
     lines_pbs += "#!/bin/bash\n"
     lines_pbs += "\n"
@@ -32,3 +34,9 @@ def get_pbs_lines(pbs_conf, pbs_dict):
     lines_pbs += "date\n"
 
     return lines_pbs
+
+def get_all_queues():
+    return ['batch', 'long']
+
+def get_queue_threshold():
+    return 30
