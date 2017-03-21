@@ -132,13 +132,13 @@ class RmgIn:
             return
 
         _pp = self._args['pseudopotential']
-        if len(_pp) == 1:
-            _pp = [_pp]
+        if type(_pp) == str:
+            _pp = [_pp,]
 
         for _tmp in _pp:
             element, pp_path = _tmp.split()
-            if element != os.path.basename(pp_path).split('.')[0]:
-                msg = "Pseudo potential doesnot match for element %s, exit."% element
+            if element not in os.path.basename(pp_path).split('.')[0]:
+                msg = "Pseudo potential does not match for element %s, exit."% element
                 self.setting_error(msg)
             if not os.path.isfile(pp_path):
                 msg = "Pseudo potential file: %s not found, exit."% pp_path

@@ -1,24 +1,33 @@
 #!/bin/bash
 
-#PBS -A sns
-#PBS -q batch
+#PBS -A baec
+#PBS -q normal
 #PBS -m ea
 #PBS -M zjyx1991@foxmail.com
 #PBS -j oe
-#PBS -l qos=condo
-#PBS -W group_list=cades-virtues
 #PBS -l walltime=06:30:00
-#PBS -l nodes=8:ppn=32
-#PBS -N surface-rlx-qe@/home/z8j/github/pbstool
+#PBS -l nodes=8:ppn=32:xe
+#PBS -N surface-rlx-qe@/mnt/a/u/sciteam/zhang7/github/pbstool
 
+source /opt/modules/default/init/bash
+module swap PrgEnv-cray PrgEnv-gnu
 module list
 
 export OMP_NUM_THREADS=1
 
-cd /home/z8j/github/pbstool
+export MPICH_MAX_THREAD_SAFETY=serialized
+export OMP_WAIT_POLICY=passive
+export MPICH_ENV_DISPLAY=1
+export MPICH_ALLREDUCE_NO_SMP=1
+ulimit -a
+export CRAY_CUDA_PROXY=1
+export MPICH_UNEX_BUFFER_SIZE=362914560
+export MPICH_MAX_SHORT_MSG_SIZE=3200
+
+cd /mnt/a/u/sciteam/zhang7/github/pbstool
 
 date
 
-mpirun -np 256 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu rmg.in > rmg.00.out
+aprun -n 256 -N 32 -d 1 -cc numa_node /u/sciteam/zhang7/bin/rmg-cpu rmg.in > rmg.00.out
 
 date
