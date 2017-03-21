@@ -1,4 +1,5 @@
 import os
+import sys
 from pbs_opts import *
 
 # add set and get functions here, cause it may be modified

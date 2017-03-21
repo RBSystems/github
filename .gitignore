@@ -1,2 +1,6 @@
-*.pyc
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+
 virtues*

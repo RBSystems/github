@@ -100,7 +100,6 @@ class InitEnv:
         return self._home_path
 
 
-
 # check if settings make sense, and correct them
 def validate_params(pbs_conf, init_env):
 

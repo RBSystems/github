@@ -132,6 +132,9 @@ class RmgIn:
             return
 
         _pp = self._args['pseudopotential']
+        if len(_pp) == 1:
+            _pp = [_pp]
+
         for _tmp in _pp:
             element, pp_path = _tmp.split()
             if element != os.path.basename(pp_path).split('.')[0]:
