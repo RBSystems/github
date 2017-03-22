@@ -52,8 +52,8 @@ potential_acceleration_poisson_step="0.0"
 #kohn_sham_mucycles = "3"
 
 pseudopotential="
-Zr /u/sciteam/zhang7/svn_personal/qe/pp/Zr.pbe-mt_fhi.UPF
-H /u/sciteam/zhang7/svn_personal/qe/pp/H.pbe-mt_fhi.UPF
+Zr /home/z8j/svn_personal/qe/pp/Zr.pbe-mt_fhi.UPF
+H /home/z8j/svn_personal/qe/pp/H.pbe-mt_fhi.UPF
 "
 
 bravais_lattice_type="Orthorhombic Primitive"

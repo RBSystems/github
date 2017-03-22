@@ -140,13 +140,13 @@ def PBSRun(init_env, pbs_conf):
     lines_conf += '#! /bin/bash'+'\n\n'
     lines_conf += 'Computer name: %s'%init_env.get_host() + '\n\n'
     lines_conf += '*'*80+'\n'
-    lines_conf += '*'+' '*30+'PBS LINES: %6d'%len(lines_pbs)+' '*31+'*\n'
+    lines_conf += '*'+' '*30+'PBS LINES: %6d'%(lines_pbs.count('\n'))+' '*31+'*\n'
     lines_conf += '*'*80+'\n\n'
     lines_conf += '-'*80+'\n'
     lines_conf += lines_pbs
     lines_conf += '-'*80+'\n\n'
     lines_conf += '*'*80+'\n'
-    lines_conf += '*'+' '*29+'INPUT LINES: %6d'%(len(lines_in))+' '*30+'*\n'
+    lines_conf += '*'+' '*29+'INPUT LINES: %6d'%(lines_in.count('\n'))+' '*30+'*\n'
     lines_conf += '*'*80+'\n\n'
     lines_conf += '-'*80+'\n'
     lines_conf += lines_in
