@@ -9,13 +9,13 @@
 #PBS -W group_list=cades-virtues
 #PBS -l walltime=06:30:00
 #PBS -l nodes=8:ppn=32
-#PBS -N surface-rlx-qe@/home/z8j/github/pbstool
+#PBS -N surface-rlx-qe@/home/z8j/github/pbstool/tests
 
 module list
 
 export OMP_NUM_THREADS=1
 
-cd /home/z8j/github/pbstool
+cd /home/z8j/github/pbstool/tests
 
 date
 
