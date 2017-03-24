@@ -1,35 +1,36 @@
-#!/usr/bin/python -u 
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
 # Copyright 2011 Li Zhu <zhulipresent@gmail.com>
 # Licensed under the GPL V3
 # Version: 0.2.8
 # update: 2011.4.6
+# modified by zjyx at March/2016, ORNL
 
+import os
+import sys
+import re
 import math as m
 import numpy as np
-import re
 from fractions import Fraction as frac
 
 def version():
     print 'cif -> POSCAR'
     print 'Version: 0.2.8'
-    print 
 
 def readfile(filename):
     ''' read file to a list; 
-    and del the blank lines'''
+    and del blank lines'''
     try:
         f = open(filename)
     except:
         print('Error: cannot open file:'+ filename)
-        exit(0)
+        sys.exit(1)
     rst = []
-    try:
-        for line in f:
-            if len(line.strip()) != 0:
-                rst.append(line.strip())
-    finally:
-        f.close()
+    for line in f:
+        if len(line.strip()) != 0:
+            rst.append(line.strip())
+    f.close()
 
     return rst
 
@@ -97,6 +98,7 @@ def symmetry(cif):
         trans.append(tran1)
     return (np.array(symmetry), np.array(trans))
 
+
 def atominfo(cif):
 
     loopinfo = []
@@ -112,10 +114,7 @@ def atominfo(cif):
                     loopinfo.append(cif[j].strip())
                 else:
                     atominfo.append(cif[j].strip().replace('(','').replace(')',''))
-        # debug
-        # print 'ttt'
-        # print loopinfo
-        # end debug
+
         if '_atom_site_fract_x' in loopinfo: break
 
     try:
@@ -275,6 +274,7 @@ def wPOSCAR(title, lat, type, pos):
         f.write("%8.5f %8.5f %8.5f\n" % tuple(item))
         
 if __name__ == '__main__':
+
     import sys
     args = sys.argv
     if len(args) == 1:

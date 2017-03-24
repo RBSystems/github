@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
 '''
-Program: generate and submit pbs files for RMG/qe, etc.
-         save run configurations for later debug
+Program: create and submit pbs files for RMG/qe, etc.
+         save run configurations in separate files
     zjyx, @2017/02, ORNL
 
 ChangeLogs:
@@ -39,7 +39,7 @@ USAGE:
     MODULE      = PrgEnv-gnu
     MODULE      = fftw
     ------------------------------------------------------------------------
-    If $pbs.conf not specified, pbs.conf will be read by default.
+    If $pbs.conf is not specified, pbs.conf will be read by default.
 
 '''
 
