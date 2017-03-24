@@ -144,6 +144,18 @@ class RmgIn:
                 msg = "Pseudo potential file: %s not found, exit."% pp_path
                 self.setting_error(msg)
 
+    def validate_start_mode(self):
+        _start_mode = self._args['start_mode']
+        if _start_mode.lower() == 'restart from file':
+            if not os.path.isfile('Waves/wave.out.restart'):
+                msg = "Error: restart files not found, exit."
+                self.setting_error(msg)
+        elif _start_mode.lower() == 'lcao start':
+            pass
+        else:
+            msg = "Unrecognized start mode, exit."
+            self.setting_error(msg)
+
     def validate_spacing(self):
         sys.path.append('..')
         
@@ -175,5 +187,6 @@ class RmgIn:
 
 def validate_rmgin(args):
     args.validate_pp()
+    args.validate_start_mode()
     args.validate_spacing()
     args.validate_subdiag_driver()
