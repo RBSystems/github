@@ -1,0 +1,76 @@
+#Description of run.
+description="Ammonia"
+
+# Wavefunction grid
+wavefunction_grid="32 32 32"
+kpoint_mesh="4 4 4"
+#input_wave_function_file="Diamond"
+#output_wave_function_file="Diamond"
+
+relax_max_force = "0.001"
+
+
+occupations_type="Fixed"  
+
+#start_mode="LCAO Start"
+start_mode="LCAO Start"
+
+calculation_mode="Relax Structure"
+max_md_steps = "100"
+
+
+rms_convergence_criterion="1.0e-8"
+
+charge_mixing_type="Pulay"
+charge_pulay_order="5"
+charge_pulay_scale="0.5"
+
+# Subspace diagonalization options
+#initial_diagonalization = "true"
+subdiag_driver="lapack"
+
+
+# Potential acceleration options
+# By default poisson is set to zero but it may work better for some systems
+# Setting it to 1.0 is a good option.
+potential_acceleration_constant_step="0.0"
+potential_acceleration_poisson_step="0.0"
+
+kohn_sham_mucycles = "3"
+
+# Units for bravais_lattice_type and atoms
+crds_units="Angstrom"
+length_units="Angstrom"
+#"Angstrom"
+
+bravais_lattice_type="Orthorhombic Primitive"
+
+# Lattice constants 
+a_length="5.1305"
+b_length="5.1305"
+c_length="5.1305"
+
+#atomic_coordinate_type="Cell Relative"
+atomic_coordinate_type="Absolute"
+
+# List  atomic symbol, coordinates, and movable flag (1 == movable) 
+# symbol and coordinates are required, moveable is optional, default is 1
+atoms =
+"
+N       1.0789441   1.0789441   1.0789441
+N       1.4863058   4.0515558   3.6441941
+N       3.6441941   1.4863058   4.0515558
+N       4.0515558   3.6441941   1.4863058
+H       1.9095721   1.3477823   0.5710246
+H       1.9942253   3.2209279   3.9130323
+H       3.1362746   0.6556779   3.7827176
+H       4.5594753   4.4748221   1.2174676
+H       1.3477823   0.5710246   1.9095721
+H       1.2174676   4.5594753   4.4748221
+H       3.2209279   3.9130323   1.9942253
+H       0.5710246   1.9095721   1.3477823
+H       0.6556779   3.7827176   3.1362746
+H       4.4748221   1.2174676   4.5594753
+H       3.9130323   1.9942253   3.2209279
+H       3.7827176   3.1362746   0.6556779
+"

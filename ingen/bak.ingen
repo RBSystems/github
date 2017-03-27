@@ -41,8 +41,8 @@ kw = {
 'potential_path' : '',
 'nodes' : '8',
 'wall_time' : '24',
-'random_seed' : '100',
-'wfc_grid' : '1 1 1'
+'random_seed' : '100'
+'wfc_grid': '1 1 1'
 }
 
 # element information
@@ -462,51 +462,7 @@ def write_phonopy_conf(filename,kw,cell):
     f.close()
 
 def write_rmg_inp(filename, kw, el, cell, atoms, step):
-    sc = map(int, kw['supercell_dimension'].strip().split())
-    nelem = [x*sc[0]*sc[1]*sc[2] for x in cell.nelem]
-    f = open(filename, 'wb')
-    print >> f, 'description="%(project_name)s"'% kw
-    print >> f, 'start_mode="LCAO Start"'
-    print >> f, '#start_mode="Restart From File"'
-    print >> f, 'wavefunction_grid="%(wfc_grid)s"'% kw
-    print >> f, 'kpoint_mesh="%(electron_k_mesh)s"'% kw
-    if kw['enforce_symmetry']=='true':
-        print >> f, 'use_symmetry="true"'
-    if kw['run_type']=='geo_opt' or ('phonon' in kw['run_type'] and step==0):
-        print >> f, 'calculation_mode="Relax_structure"'
-        print >> f, 'max_md_steps="300"'
-        print >> f, 'max_scf_steps="300"'
-        print >> f, 'relax_max_force="1.0e-4"'
-        print >> f, 'rms_convergence_criterion="1.0e-8"'
-    if kw['band_gap'] == 'insulator':
-        print >> f, 'occupation_type="Fixed"'
-    elif kw['band_gap'] == 'metal':
-        print >> f, 'occupation_type="Fermi Dirac"'
-    print >> f, 'subdiag_driver="scalapack"'
-    print >> f, 'charge_mixing_type="Pulay"'
-    print >> f, 'charge_pulay_order="3"'
-    print >> f, 'charge_pulay_scale="0.5"'
-    print >> f, 'bravais_lattice_type="Orthorhombic Primitive"'
-    print >> f, 'crds_units="Angstrom"'
-    print >> f, 'a_length="%f"'% (sc[0]*cell.lattice[0][0])
-    print >> f, 'b_length="%f"'% (sc[1]*cell.lattice[1][1])
-    print >> f, 'c_length="%f"'% (sc[2]*cell.lattice[2][2])
-    print >> f, 'atomic_coordinate_type="Cell Relative"'
-    print >> f, 'atoms="'
-    for i in range(len(atoms)):
-        for s0 in range(sc[0]):
-            for s1 in range(sc[1]):
-                for s2 in range(sc[2]):
-                    if random.random() <= atoms[i].occ:
-                        x = (atoms[i].frac_xyz[0]+s0)/sc[0]
-                        y = (atoms[i].frac_xyz[1]+s0)/sc[1]
-                        z = (atoms[i].frac_xyz[2]+s0)/sc[2]
-                        print >> f, '%2s%15.9f%15.9f%15.9f%3d'%(
-                                    atoms[i].symbol, x, y, z, 1)
-                    else:
-                        nelem[cell.elem.index(atoms[i].symbol)] -= 1
-    print >> f, '"'
-    f.close() 
+
 
 def write_castep_cell(filename,kw,el,cell,atoms,step):
     sc = map(int,kw['supercell_dimension'].strip().split())
