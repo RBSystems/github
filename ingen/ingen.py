@@ -40,6 +40,7 @@ kw = {
 'phonon_fine_k_mesh_offset' : '0 0 0',
 'potential_path' : '',
 'nodes' : '8',
+'threads': '1',
 'wall_time' : '24',
 'random_seed' : '100',
 'wfc_grid' : '1 1 1'
@@ -461,10 +462,35 @@ def write_phonopy_conf(filename,kw,cell):
     print >> f, 'EIGENVECTORS = .TRUE.'
     f.close()
 
-def write_rmg_inp(filename, kw, el, cell, atoms, step):
+def init_rmg(proj_path):
+    #from shutill import copy
+    init_dir = os.path.join(proj_path, 'init')
+    relax_dir = os.path.join(proj_path, 'relax')
+    unitcell_dir = os.path.join(proj_path, 'unitcell')
+    phonon_dir = os.path.join(proj_path, 'phonon')
+
+    for tmp_dir in [init_dir, relax_dir, unitcell_dir, phonon_dir]:
+        if not os.path.isdir(tmp_dir):
+            os.mkdir(tmp_dir)
+
+    #copy('*cif')
+    os.system('cp *cif *conf %s'% init_dir)
+
+    # generate relaxed unitcell
+    #from interface.rmg import get_relaxed_unitcell
+    #get_relaxed_unitcell()
+
+    f = open(os.path.join(unitcell_dir, 'unitcell.sh'), 'wb')
+    print >> f, '#! /bin/bash'
+    print >> f, 'cp ../relax/rmg.in ../relax/rmg.in.00.log .'
+    print >> f, '#python ~/bin/generate_unitcell_after_relaxation.py'
+    f.close()
+    os.system('chmod a+x %s'%(os.path.join(unitcell_dir, 'unitcell.sh')))
+
+def write_rmg_inp(proj_path, filename, kw, el, cell, atoms, step):
     sc = map(int, kw['supercell_dimension'].strip().split())
     nelem = [x*sc[0]*sc[1]*sc[2] for x in cell.nelem]
-    f = open(filename, 'wb')
+    f = open(os.path.join(proj_path, 'relax', filename), 'wb')
     print >> f, 'description="%(project_name)s"'% kw
     print >> f, 'start_mode="LCAO Start"'
     print >> f, '#start_mode="Restart From File"'
@@ -473,7 +499,7 @@ def write_rmg_inp(filename, kw, el, cell, atoms, step):
     if kw['enforce_symmetry']=='true':
         print >> f, 'use_symmetry="true"'
     if kw['run_type']=='geo_opt' or ('phonon' in kw['run_type'] and step==0):
-        print >> f, 'calculation_mode="Relax_structure"'
+        print >> f, 'calculation_mode="Relax Structure"'
         print >> f, 'max_md_steps="300"'
         print >> f, 'max_scf_steps="300"'
         print >> f, 'relax_max_force="1.0e-4"'
@@ -506,7 +532,59 @@ def write_rmg_inp(filename, kw, el, cell, atoms, step):
                     else:
                         nelem[cell.elem.index(atoms[i].symbol)] -= 1
     print >> f, '"'
-    f.close() 
+    f.close()
+
+def write_rmg_pbs(proj_path, filename, kw):
+    home_path = os.path.expanduser('~')
+    f = open(os.path.join(proj_path, 'relax', filename), 'wb')
+    print >> f, '# mandatory'
+    print >> f, 'NODES       = %(nodes)-s'% kw
+    print >> f, 'TIME        = %(wall_time)-s'% kw
+    print >> f, '%-12s= %-s'%('EXEINPUT', 'rmg.in')
+    print >> f, '%-12s= %-s/bin/rmg-cpu'%('EXEPATH', home_path)
+    print >> f, 'THREADS     = %(threads)-s'% kw
+    print >> f, ''
+    print >> f, '# optional'
+    print >> f, 'NAME        = %(project_name)-s'% kw
+    print >> f, '%-12s= %-s'%('IS_SUBMIT', 'true')
+    print >> f, '%-12s= %-s'%('QUEUE', 'none')
+    f.close()
+
+def write_rmg_phonopy(proj_path, filename, kw, cell):
+    f = open(os.path.join(proj_path, 'phonon', filename), 'wb')
+    print >> f, '# build supercells'
+    print >> f, 'phonopy --rmg -d -dim=\"%(phonon_supercell)s\" -c unitcell.in'% kw
+    print >> f, '# calculate force sets'
+    print >> f, '#phonopy --rmg -f supercells/supercell-*/*in.00.log'
+    print >> f, '# plot band+dos'
+    print >> f, '#phonopy --rmg -c unitcell.in -s -p band-dos.conf'
+    print >> f, '# plot band only'
+    print >> f, '#phonopy --rmg -c unitcell.in -s -p band.conf'
+    print >> f, '# plot dos only; also needs dos.conf file'
+    print >> f, '#phonopy --rmg -c unitcell.in -s -p mesh.conf'
+    f.close()
+    os.system('chmod a+x %s'%(os.path.join(proj_path, 'phonon', filename)))
+
+    f = open(os.path.join(proj_path, 'phonon', 'band.conf'), 'wb')
+    print >> f, 'DIM = %(phonon_supercell)s'% kw
+    print >> f, 'PRIMITIVE_AXIS = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0'
+    print >> f, 'BAND = 0.0 0.0 0.0  0.0 0.5 0.0  0.5 0.5 0.0  0.5 0.5 0.5'
+    print >> f, 'BAND_LABELS = \Gamma X M R'
+    f.close()
+
+    f = open(os.path.join(proj_path, 'phonon', 'dos.conf'), 'wb')
+    print >> f, 'DIM = %(phonon_supercell)s'% kw
+    print >> f, 'DOS = .TRUE.'
+    print >> f, 'DOS_RANGE = 0 40 0.02'
+    f.close()
+
+    f = open(os.path.join(proj_path, 'phonon', 'mesh.conf'), 'wb')
+    print >> f, 'DIM = %(phonon_supercell)s'% kw
+    print >> f, 'ATOM_NAME = '+' '.join(cell.elem)
+    print >> f, 'MP = %(phonon_fine_k_mesh)s'% kw
+    print >> f, 'GAMMA_CENTER = .TRUE.'
+    print >> f, 'EIGENVECTORS= .TRUE.'
+    f.close()
 
 def write_castep_cell(filename,kw,el,cell,atoms,step):
     sc = map(int,kw['supercell_dimension'].strip().split())
@@ -742,8 +820,14 @@ elif kw['software']=='castep':
     write_pbs(os.path.join(proj_path,'virtues.pbs'),kw)
 
 elif kw['software'] == 'rmg':
-    # generate rmg.in file
-    write_rmg_inp(os.path.join(proj_path, 'rmg.in'), kw, el, cell, atoms, 0)
+    # initilization
+    init_rmg(proj_path)
 
-    # generate pbs file
-    write_pbs('pbs.conf', kw)
+    # generate rmg.in file
+    write_rmg_inp(proj_path, 'rmg.in', kw, el, cell, atoms, 0)
+
+    # generate pbs configuration file
+    write_rmg_pbs(proj_path, 'pbs.conf', kw)
+
+    # generate phonopy files
+    write_rmg_phonopy(proj_path, 'phonon.sh', kw, cell)
