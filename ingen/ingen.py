@@ -831,3 +831,16 @@ elif kw['software'] == 'rmg':
 
     # generate phonopy files
     write_rmg_phonopy(proj_path, 'phonon.sh', kw, cell)
+
+elif kw['software'] == 'qe':
+    # initilization
+    init_qe(proj_path, kw)
+
+    # generate qe.in file
+    write_qe_in(proj_path, 'qe.in', kw, el, cell, atoms, 0)
+
+    # generate pbs configuration file
+    write_qe_pbs(proj_path, 'pbs.conf', kw)
+
+    # generate phonopy files
+    write_qe_phonopy(proj_path, 'phonon.sh', kw, cell)

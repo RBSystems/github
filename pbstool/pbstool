@@ -132,6 +132,14 @@ def PBSRun(init_env, pbs_conf):
             lines_in += "\n%s\n"% _input
             with open(_input, 'rb') as f:
                 lines_in += f.read()
+    elif pbs_conf._params['exename'] == 'CASTEP':
+        lines_in = ""
+        lines_in += "\n%s\n"% (pbs_conf._params['exeinput']+'.cell')
+        with open(pbs_conf._params['exeinput']+'.cell', 'rb') as f:
+            lines_in += f.read()
+        lines_in += "\n%s\n"% (pbs_conf._params['exeinput']+'.param')
+        with open(pbs_conf._params['exeinput']+'.param', 'rb') as f:
+            lines_in += f.read()
     else:
         with open('%s'% pbs_conf._params['exeinput'], 'rb') as f:
             lines_in = f.read()

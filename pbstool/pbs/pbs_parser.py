@@ -206,6 +206,7 @@ class ConfParser:
         rmg_exe_list = ['rmg-cpu']
         qe_exe_list = ['pw.x', 'phon']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
+        castep_exe_list = ['castep.mpi']
         exepath  = self._params['exepath']
         exename  = os.path.basename(exepath)
         if not os.path.isfile(exepath):
@@ -219,6 +220,11 @@ class ConfParser:
             #print "EXE name: %s"% 'QE'
         elif exename in vasp_exe_list:
             self._params['exename'] = 'VASP'
+        elif exename in castep_exe_list:
+            self._params['exename'] = 'CASTEP'
+        else:
+            msg = "Error: unknown input file format, exit."
+            self.setting_error(msg)
             #print "EXE name: %s"% 'VASP'
 
     def validate_module(self):
@@ -242,7 +248,12 @@ class ConfParser:
         if exename == 'VASP':
             for _vasp_in in exeinput:
                 if not os.path.isfile(_vasp_in):
-                    msg = "Error: %s input file %s not found, exit."%(exename, exeinput)
+                    msg = "Error: %s input file %s not found, exit."%(exename, _vasp_in)
+                    self.setting_error(msg)
+        elif exename == 'CASTEP':
+            for _castep_in in [exeinput+'.cell', exeinput+'.param']:
+                if not os.path.isfile(_castep_in):
+                    msg = "Error: %s input file %s not found, exit."%(exename, _castep_in)
                     self.setting_error(msg)
         elif not os.path.isfile(exeinput):
             msg = "Error: %s input file %s not found, exit."%(exename, exeinput)
@@ -250,11 +261,18 @@ class ConfParser:
 
         self.check_exeinput(exename, exeinput)
 
+    # check if input arguments make sense
     def check_exeinput(self, exename, exeinput):
         if exename == "RMG":
             from interface import rmg
             in_args = rmg.RmgIn(exeinput)
             rmg.validate_rmgin(in_args)
+        elif exename == "CASTEP":
+            from interface import castep
+            cell_args = castep.CellIn(exeinput+'.cell')
+            param_args = castep.ParamIn(exeinput+'.param')
+            castep.validate_cell(cell_args)
+            castep.validate_param(param_args)
         #elif exename == 'qe':
         #    in_args = QeIn(exeinput)
 
