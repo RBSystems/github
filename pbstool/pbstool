@@ -6,17 +6,17 @@ Program: create and submit pbs files for RMG/qe, etc.
     zjyx, @2017/02, ORNL
 
 ChangeLogs:
-    1. remove queue tags, which will be determined by walltime and host
+    1. removed queue tags, now it will be determined by walltime and host
         automatically.
-    2. change param's 'type' from type+_type+__type to [type, type];
-       change format of str to 'str'
-    3. add support for qe
-    4. add module options;
-       add suppot for vasp
-    5. add check_input function
+    2. changed param's 'type' from type+_type+__type to [type, type];
+       changed format of str to 'str'
+    3. added support for qe
+    4. added module options;
+       added suppot for vasp
+    5. added check_input function
+    6. added support for castep
 
 TODO:
-    add support for castep
 
 USAGE:
     pbstool ($pbs.conf file)
@@ -170,7 +170,7 @@ def PBSRun(init_env, pbs_conf):
         while os.path.isfile('runenv.%02d'%(i)):
             i += 1
     
-        with open('runenv.%02d'% i, 'wb') as f:
+        with open('run.%02d'% i, 'wb') as f:
             f.write(lines_conf)
 
     # echo pbs conf to screen
