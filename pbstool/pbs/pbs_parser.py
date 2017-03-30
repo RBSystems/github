@@ -283,7 +283,8 @@ class ConfParser:
         elif exeoutput.lower() == 'none':
             exeoutput_pre = self._params['exeinput'].split('.in')[0]
             i = 0
-            while os.path.isfile("%s.%02d.out"%(exeoutput_pre, i)):
+            #while os.path.isfile("%sy%02d"%(exeoutput_pre, i)):
+            while os.path.isfile("run.%02d"% i):
                 i += 1
 
             exeoutput = "%s.%02d.out"%(exeoutput_pre, i)
