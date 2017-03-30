@@ -760,10 +760,10 @@ elif kw['structure_file_type']=='cell':
     [cell,atoms] = read_castep_cell(sys.argv[2])
 
 # creae folder for project
-if not os.path.exists(kw['project_name']):
-    proj_path = kw['project_name']
+if not os.path.exists(kw['software']):
+    proj_path = kw['software']
 else:
-    proj_path = kw['project_name']+'-'+datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    proj_path = kw['software']+'-'+datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 os.makedirs(proj_path)
 
 # generate vasp calculation
