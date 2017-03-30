@@ -167,7 +167,7 @@ def PBSRun(init_env, pbs_conf):
 
         # save configurations: including input file and pbs file
         i = 0
-        while os.path.isfile('runenv.%02d'%(i)):
+        while os.path.isfile('run.%02d'%(i)):
             i += 1
     
         with open('run.%02d'% i, 'wb') as f:
