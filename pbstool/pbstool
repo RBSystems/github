@@ -109,16 +109,17 @@ def validate_params(pbs_conf, init_env):
             pbs_conf.set_param(key, param_prop[key]['default'])
 
     # DO NOT change orders of following lines
+    # BEWARE: exepath must be in front of exeinput
+    #       queue be in front of name
     pbs_conf.validate_exepath()
-    pbs_conf.validate_name(init_env.get_pwd())
+    pbs_conf.validate_queue(init_env.get_host())
+    pbs_conf.validate_name(init_env.get_pwd(), pbs_conf._workdir)
     pbs_conf.validate_is_submit()
     pbs_conf.validate_cores()
     pbs_conf.validate_threads()
-    # BEWARE: exepath must be in front of exeinput
     pbs_conf.validate_exeinput()
     pbs_conf.validate_exeoutput()
     pbs_conf.validate_module()
-    pbs_conf.validate_queue(init_env.get_host())
 
 
 def PBSRun(init_env, pbs_conf):
@@ -192,6 +193,7 @@ if __name__ == "__main__":
         print("PBS conf file not found, exit.")
         sys.exit(1)
 
+    # get initial enviornment variables
     init_env = InitEnv()
     os.system('export PYTHONPATH=$PYTHONPATH:%s'% init_env.get_pwd())
 

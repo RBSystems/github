@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime
 from pbs_opts import *
 
 # add set and get functions here, cause it may be modified
@@ -13,6 +14,7 @@ class ConfParser:
         }
 
         self._params = {}
+        self._workdir=""
 
         if filename is not None:
             self.read_file(filename)
@@ -105,26 +107,6 @@ class ConfParser:
             msg = "Error: %s type tag could not be identified."% key.upper()
             self.setting_error(msg)
 
-        #if not isinstance(_param['type'], list):
-        #    if _param['type'].lower() == 'str':
-        #        self._params[key] = str(val)
-        #    elif _param['type'].lower() == 'int':
-        #        self._params[key] = int(val)
-        #    elif _param['type'].lower() == 'float':
-        #        self._params[key] = float(val)
-        #    elif _param['type'].lower() == 'bool':
-        #        if val.lower() == 'false':
-        #            self._params[key] = False
-        #        elif val.lower() == 'true':
-        #            self._params[key] = True
-        #elif len(_param['type']) == 2:
-        #    if _param['type'][0] == 'list':
-        #        _2type = eval(_param['type'][1])
-        #        self._params[key] = [_2type(x) for x in val.split()]
-        #else:
-        #    msg = "Error: %s type tag could not be identified."% key.upper()
-        #    self.setting_error(msg)
-
     def _set_nodes(self, val):
         self._params['nodes'] = int(val)
 
@@ -146,10 +128,6 @@ class ConfParser:
             self._confs['exeinput'] = vasp_in
 
     def _set_module(self, val):
-        #if 'module' not in self._params:
-        #    self._params['module'] = []
-
-        #self._params['module'].append(str(val))
         self._params['module'] = val
 
     def _set_threads(self, val):
@@ -179,9 +157,9 @@ class ConfParser:
     def validate_params(self):
         pass
 
-    def validate_name(self, pwd):
+    def validate_name(self, parent_wd, post_wd):
         name = self._params['name']
-        self._params['name'] = name + '@' + pwd
+        self._params['name'] = name + '@' + parent_wd + '/' + post_wd
 
     def validate_is_submit(self):
         is_submit = self._params['is_submit']
@@ -296,6 +274,10 @@ class ConfParser:
     def validate_queue(self, host):
         time = self._params['time']
         queue = self._params['queue']
+        if queue == 'debug':
+            dir_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            self._workdir = os.path.join('debug', dir_time)
+            os.makedirs(self._workdir)
         if host == "Cades":
             self._validate_queue_cades(queue, time)
         elif host == "BlueWaters":
@@ -306,9 +288,11 @@ class ConfParser:
 
     def _validate_queue_cades(self, queue, time):
         all_queues = ['batch', 'long']
-        if queue != 'none' and queue not in all_queues:
+        if queue.lower() == 'debug':
+            queue = all_queues[0]
+        elif queue != 'none' and queue not in all_queues:
             msg = "Queue error, exit."
-            pbs_conf.setting_error(msg)
+            self.setting_error(msg)
         if time[0] > 48:
             queue = all_queues[1]
             print "Walltime exceeds 48 hrs, queue is set to %s.\n"% queue
@@ -346,7 +330,7 @@ def write_pbs(init_env, pbs_conf):
     module   = pbs_conf._params['module']
 
     # convert to pbs format
-    pwd         = init_env.get_pwd()
+    pwd         = os.path.join(init_env.get_pwd(), pbs_conf._workdir)
     ppn_use     = divmod(32, threads)[0]
     time_pbs    = "%02d:%02d:00"%(time[0], time[1])
 
