@@ -159,7 +159,7 @@ class ConfParser:
 
     def validate_name(self, parent_wd, post_wd):
         name = self._params['name']
-        self._params['name'] = name + '@' + parent_wd + '/' + post_wd
+        self._params['name'] = (name+'@'+parent_wd+'/'+post_wd).rstrip('/')
 
     def validate_is_submit(self):
         is_submit = self._params['is_submit']
@@ -277,7 +277,6 @@ class ConfParser:
         if queue == 'debug':
             dir_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             self._workdir = os.path.join('debug', dir_time)
-            os.makedirs(self._workdir)
         if host == "Cades":
             self._validate_queue_cades(queue, time)
         elif host == "BlueWaters":
@@ -360,5 +359,5 @@ def write_pbs(init_env, pbs_conf):
         from hosts import bluewaters
         lines_pbs = bluewaters.get_pbs_lines(pbs_dict)
 
-    with open('pbs.%s'% exename.lower(), 'wb') as f:
+    with open(os.path.join(pwd, 'pbs.%s'% exename.lower()), 'wb') as f:
         f.write(lines_pbs)

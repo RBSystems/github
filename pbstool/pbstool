@@ -5,17 +5,6 @@ Program: create and submit pbs files for RMG/qe, etc.
          save run configurations in separate files
     zjyx, @2017/02, ORNL
 
-ChangeLogs:
-    1. removed queue tags, now it will be determined by walltime and host
-        automatically.
-    2. changed param's 'type' from type+_type+__type to [type, type];
-       changed format of str to 'str'
-    3. added support for qe
-    4. added module options;
-       added suppot for vasp
-    5. added check_input function
-    6. added support for castep
-
 TODO:
 
 USAGE:
@@ -40,6 +29,9 @@ USAGE:
     MODULE      = fftw
     ------------------------------------------------------------------------
     If $pbs.conf is not specified, pbs.conf will be read by default.
+
+    1. if QUEUE is 'debug', then subdirectories will be created and jobs will
+       be run in those directories.
 
 '''
 
@@ -121,10 +113,15 @@ def validate_params(pbs_conf, init_env):
     pbs_conf.validate_exeoutput()
     pbs_conf.validate_module()
 
+    # create sub directories
+    if pbs_conf._workdir != '':
+        os.makedirs(pbs_conf._workdir)
+
 
 def PBSRun(init_env, pbs_conf):
+    full_workdir = os.path.join(init_env.get_pwd(), pbs_conf._workdir)
 
-    with open('pbs.%s'% pbs_conf._params['exename'].lower(), 'rb') as f:
+    with open(os.path.join(full_workdir, 'pbs.%s'% pbs_conf._params['exename'].lower()), 'rb') as f:
         lines_pbs = f.read()
 
     if pbs_conf._params['exename'] == 'VASP':
@@ -162,16 +159,22 @@ def PBSRun(init_env, pbs_conf):
     lines_conf += '-'*80+'\n\n'
     
     # submit pbs
+
+    if pbs_conf._workdir != '':
+        os.system('cp %s %s'%(pbs_conf._params['exeinput'], full_workdir))
+
     if pbs_conf._params['is_submit']:
         print "Submitting jobs..."
+        os.chdir(full_workdir)
         os.system('qsub pbs.%s'% pbs_conf._params['exename'].lower())
+        os.chdir(init_env.get_pwd())
 
         # save configurations: including input file and pbs file
         i = 0
-        while os.path.isfile('run.%02d'%(i)):
+        while os.path.isfile(os.path.join(full_workdir, 'run.%02d'%(i))):
             i += 1
     
-        with open('run.%02d'% i, 'wb') as f:
+        with open(os.path.join(full_workdir, 'run.%02d'% i), 'wb') as f:
             f.write(lines_conf)
 
     # echo pbs conf to screen
@@ -195,13 +198,20 @@ if __name__ == "__main__":
 
     # get initial enviornment variables
     init_env = InitEnv()
+
+    # export PYTHONPATH
     os.system('export PYTHONPATH=$PYTHONPATH:%s'% init_env.get_pwd())
 
+    # parse pbs control args
     pbs_conf = ConfParser(filename)
     # print pbs_conf._params
+
+    # validate pbs control args and other args
     validate_params(pbs_conf, init_env)
     #print pbs_conf._params
 
+    # write pbs batch scripts
     write_pbs(init_env, pbs_conf)
 
+    # submit pbs files
     PBSRun(init_env, pbs_conf)
