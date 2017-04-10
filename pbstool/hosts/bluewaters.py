@@ -7,7 +7,7 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "#PBS -A baec\n"
     lines_pbs += "#PBS -q %(queue)s\n"% pbs_dict
     lines_pbs += "#PBS -m ea\n"
-    lines_pbs += "#PBS -M zjyx1991@foxmail.com\n"
+    lines_pbs += "#PBS -M zjyx147@foxmail.com\n"
     lines_pbs += "#PBS -j oe\n"
     lines_pbs += "#PBS -l walltime=%(time)s\n"% pbs_dict
     lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32:xe\n"% pbs_dict
