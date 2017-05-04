@@ -5,11 +5,12 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "#! /bin/bash\n"
     lines_pbs += "\n"
     lines_pbs += "#PBS -A sns\n"
-    lines_pbs += "#PBS -q %(queue)s\n"% pbs_dict
+    #lines_pbs += "#PBS -q %(queue)s\n"% pbs_dict
+    lines_pbs += "#PBS -q batch\n"
     lines_pbs += "#PBS -m ea\n"
     lines_pbs += "#PBS -M zjyx147@foxmail.com\n"
     lines_pbs += "#PBS -j oe\n"
-    lines_pbs += "#PBS -l qos=condo\n"
+    lines_pbs += "#PBS -l qos=long\n"
     lines_pbs += "#PBS -W group_list=cades-virtues\n"
     lines_pbs += "#PBS -l walltime=%(time)s\n" % pbs_dict
     lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32\n"% pbs_dict
