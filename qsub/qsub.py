@@ -144,7 +144,7 @@ if __name__ == "__main__":
     # sample pbs file
     file_pbs = 'pbs.sh'
     # log file name
-    file_log = 'log.pbs'
+    name_log = 'log.pbs'
     # common name of all subdirectories
     pre_pathname = 'supercell'
     # width of directories' name
@@ -159,10 +159,14 @@ if __name__ == "__main__":
 #   end of variables
 #####################################################################
 
-    i = 11
+    # where jobs start
+    if len(sys.argv) > 1:
+        i = sys.argv[1]
+    else:
+        i = 1
 
     pwd = os.getcwd()
-
+    file_log = os.path.join(pwd, name_log)
     pathname = get_pathname(i)
     while os.path.exists(pathname):
 
@@ -185,7 +189,8 @@ if __name__ == "__main__":
             #req_procs = get_req_procs()
 
         if not os.path.exists('./supercell.in.00.rmsdv.xmgr'):
-            os.system('rm supercell.in.*')
+            if os.path.exists('./supercell.in.*'):
+                os.system('rm supercell.in.*')
             os.system('qsub %s'% file_pbs)
             sub_info = ('Job for %s is submitted.'% pathname)
             os.system("echo %s >> %s"%(sub_info, file_log))
