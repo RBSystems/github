@@ -1,5 +1,6 @@
 import os
 import sys
+from pbscolors import pbscolors
 import numpy as np
 
 class RmgIn:
@@ -13,6 +14,8 @@ class RmgIn:
                              'crds_units': self._set_units,
                              'atoms': self._set_atoms,
                              'calculation_mode': self._set_calc_mode,
+                             'input_wave_function_file': self._set_in_wave,
+                             'output_wave_function_file': self._set_out_wave,
                              #'subdiag_driver': self._set_subdiag_driver,
                              #'relax_max_force': self._set_rlx_force,
                              #'rms_convergence_criterion': self._set_rms_conv,
@@ -28,8 +31,11 @@ class RmgIn:
         self._arg_parser()
 
     def setting_error(self, msg):
-        print msg
+        print pbscolors.ERROR + "Error: " + msg + pbscolors.ENDC
         sys.exit(1)
+
+    def setting_warning(self, msg):
+        print pbscolors.WARNING + "Warning: " + msg + pbscolors.ENDC
 
     # TODO: need to find a better solution
     def read_file(self, filename):
@@ -119,13 +125,32 @@ class RmgIn:
     def _set_atoms(self, val):
         self._args['atoms'] = str(val)
 
+    def _set_in_wave(self, val):
+        self._args['input_wave_function_file'] = str(val)
+
+    def _set_out_wave(self, val):
+        self._args['output_wave_function_file'] = str(val)
+
     def _set_start_mode(self, val):
         self._args['start_mode'] = str(val)
 
     def validate_subdiag_driver(self):
         _subdiag_driver = self._args['subdiag_driver']
         if _subdiag_driver != 'scalapack':
-            print "Warning: A non-scalapck subdiag driver is used."
+            msg =  "Non-scalapck subdiag driver is used."
+            self.setting_warning(msg)
+
+    def validate_in_wave(self):
+        _in_wave = self._args['input_wave_function_file']
+        if not os.path.exists(_in_wave):
+            msg = "Input wavefunction file not found, exit."
+            self.setting_error(msg)
+
+    def validate_out_wave(self):
+        _out_wave = self._args['output_wave_function_file']
+        if os.path.exists(_out_wave):
+            msg =  "Wavefunction output file already exists."
+            self.setting_warning(msg)
 
     def validate_pp(self):
         if 'pseudopotential' not in self._args:
@@ -148,7 +173,7 @@ class RmgIn:
         _start_mode = self._args['start_mode']
         if _start_mode.lower() == 'restart from file':
             if not os.path.isfile('Waves/wave.out.restart'):
-                msg = "Error: restart files not found, exit."
+                msg = "Restart files not found, exit."
                 self.setting_error(msg)
         elif _start_mode.lower() == 'lcao start':
             pass
@@ -169,17 +194,18 @@ class RmgIn:
         elif _units.lower() == 'angstrom':
             factor = __import__('units').length().get_angstrom2bohr()
         else:
-            msg = "Error: Unknown units type %s, exit."% _units.upper()
+            msg = "Unknown units type %s, exit."% _units.upper()
             self.setting_error(msg)
 
         spacing = np.divide(_lat_vec, _wfc_grid)*factor
 
         if max(spacing) > 0.4 or min(spacing) < 0.1:
-            print "Warning: spacing may be set too large or too small."
+            msg = "Spacing may be set too large or too small."
+            self.setting_warning(msg)
 
         _aniso = max(spacing)/min(spacing)
         if _aniso > 1.1:
-            msg = "Error: anisotropy %.3f is too large, exit."% _aniso
+            msg = "Anisotropy %.3f is too large, exit."% _aniso
             self.setting_error(msg)
 
     def validate_others(self):
@@ -190,3 +216,5 @@ def validate_rmgin(args):
     args.validate_start_mode()
     args.validate_spacing()
     args.validate_subdiag_driver()
+    args.validate_in_wave()
+    args.validate_out_wave()

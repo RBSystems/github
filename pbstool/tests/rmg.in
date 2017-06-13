@@ -30,6 +30,8 @@ unoccupied_states_per_kpoint="10"
 
 #start_mode="LCAO Start"
 start_mode="LCAO Start"
+output_wave_function_file="Waves/wave.out"
+input_wave_function_file="Waves/wave.out"
 
 max_md_steps = "200"
 max_scf_steps="500"

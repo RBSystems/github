@@ -37,6 +37,7 @@ USAGE:
 
 import os
 import sys
+import pbscolors
 from pbs.pbs_opts import *
 from pbs.pbs_parser import *
 
@@ -182,6 +183,7 @@ def PBSRun(init_env, pbs_conf):
     print "-"*60
     print "%s"% ''.join(lines_pbs)
     print "-"*60
+
 
 if __name__ == "__main__":
 
