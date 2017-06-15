@@ -216,5 +216,8 @@ def validate_rmgin(args):
     args.validate_start_mode()
     args.validate_spacing()
     args.validate_subdiag_driver()
-    args.validate_in_wave()
-    args.validate_out_wave()
+
+    if 'input_wave_function_file' in args._args: 
+        args.validate_in_wave()
+    if 'output_wave_function_file' in args._args: 
+        args.validate_out_wave()

@@ -294,10 +294,10 @@ class ConfParser:
             self.setting_error(msg)
         if time[0] > 48:
             queue = all_queues[1]
-            print "Walltime exceeds 48 hrs, queue is set to %s.\n"% queue
+            #print "Walltime exceeds 48 hrs, queue is set to %s.\n"% queue
         else:
             queue = all_queues[0]
-            print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
+            #print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
         self._params['queue'] = queue
 
     def _validate_queue_bw(self, queue, time):
@@ -309,10 +309,10 @@ class ConfParser:
         if queue != 'high':
             if time[0]*60+time[1] <= 30:
                 queue = all_queues[0]
-                print "Walltime is under 30 mins, queue is set to %s.\n"% queue
+                #print "Walltime is under 30 mins, queue is set to %s.\n"% queue
             else:
                 queue = all_queues[1]
-                print "Walltime exceeds 30 mins, queue is set to %s.\n"% queue
+                # print "Walltime exceeds 30 mins, queue is set to %s.\n"% queue
         self._params['queue'] = queue
 
 def write_pbs(init_env, pbs_conf):
