@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 '''
-to plot band structure for phonopy band.yaml file
+to plot band structure and dos togenther
 '''
 
 import os
@@ -31,24 +31,37 @@ def read_band_yaml(file):
                     break
     return x, y
 
-band_qe = "band_qe.yaml"
-band_rmg = "band_rmg.yaml"
+band_file = "band.yaml"
+data_dos = np.loadtxt('total_dos.dat')
 
-kpt_qe, dos_qe = read_band_yaml(band_qe)
-kpt_rmg, dos_rmg = read_band_yaml(band_rmg)
+data_kpt, data_freq = read_band_yaml(band_file)
 #print data_vision[2]
 
-x1 = zip(*kpt_qe)[0]
-x2 = zip(*kpt_rmg)[0]
-y1 = zip(*dos_qe)
-y2 = zip(*dos_rmg)
+
+kpt = zip(*data_kpt)[0]
+freq = zip(*data_freq)
+dos = zip(*data_dos)
 ticks = [[], []]
-for tmp in kpt_qe:
+for tmp in data_kpt:
     if len(tmp) == 2:
         ticks[0].append(tmp[0])
         if '\\' in tmp[1]:
             tmp[1] = '$%s$'% tmp[1]
         ticks[1].append(tmp[1])
+
+# Two subplots, unpack the axes array immediately
+f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+for i in range(len(freq)):
+    ax1.plot(kpt, freq[i], 'b', linewidth='1')
+ax1.set_xlabel('KPoint')
+ax1.set_ylabel('Frequency(THz)')
+ax1.set_xticks(ticks[0], ticks[1])
+#ax1.set_title('Sharing Y axis')
+ax2.plot(dos[1], dos[0], 'r', linewidth='1')
+ax2.set_xlabel('Density of states')
+f.title("Band-DOS")
+plt.show()
+exit()
 
 plt.subplots(1,1)
 for i in range(len(y1)-1):
@@ -63,8 +76,6 @@ plt.xlim(0, max(x1))
 #plt.ylim(0, 50)
 plt.xlabel('kpoint')
 plt.ylabel('Frequency(THz)')
-plt.xticks(ticks[0], ticks[1])
 plt.legend(loc=(0.6, 0.6))
-#plt.title("Band comparison between RMG and Quantum Espresso")
 #plt.savefig('comparison_ammonia.png', dpi=200)
 plt.show()
