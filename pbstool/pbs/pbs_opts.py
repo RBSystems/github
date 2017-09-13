@@ -1,4 +1,3 @@
-
 # params properties
 # if param is list, then type should be [1D type, 2D type]
 param_prop = {
@@ -6,6 +5,7 @@ param_prop = {
     'time' :     {'required': True,  'type': ['list', 'int'], 'default': None},
     'exeinput':  {'required': True,  'type': 'str',   'default': None},
     'exepath':   {'required': True,  'type': 'str',   'default': None},
+    'account':   {'required': True,  'type': 'str',   'default': None},
     'threads':   {'required': False, 'type': 'int',   'default': 1},
     'name':      {'required': False, 'type': 'str',   'default': 'test'},
     'queue':     {'required': False, 'type': 'str',   'default': 'debug'},

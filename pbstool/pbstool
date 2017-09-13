@@ -3,7 +3,7 @@
 '''
 Program: create and submit pbs files for RMG/qe, etc.
          save run configurations in separate files
-    zjyx, @2017/02, ORNL
+    zjyx, 2017/02@ORNL
 
 TODO:
 
@@ -19,6 +19,7 @@ USAGE:
     EXEINPUT    = rmg.in
     EXEPATH     = /home/z8j/bin/rmg-cpu
     THREADS     = 2
+    ACCOUNT     = nta108
     
     # optional
     NAME        = surface-pbe221-rlx
@@ -108,8 +109,9 @@ def validate_params(pbs_conf, init_env):
     pbs_conf.validate_queue(init_env.get_host())
     pbs_conf.validate_name(init_env.get_pwd(), pbs_conf._workdir)
     pbs_conf.validate_is_submit()
-    pbs_conf.validate_cores()
-    pbs_conf.validate_threads()
+    pbs_conf.validate_cores(init_env.get_host())
+    pbs_conf.validate_threads(init_env.get_host())
+    pbs_conf.validate_account(init_env.get_host())
     pbs_conf.validate_exeinput()
     pbs_conf.validate_exeoutput()
     pbs_conf.validate_module()

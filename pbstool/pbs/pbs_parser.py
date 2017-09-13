@@ -10,6 +10,7 @@ class ConfParser:
                         'time':     param_prop['time']['default'],
                         'exeinput': param_prop['exeinput']['default'],
                         'exepath':  param_prop['exepath']['default'],
+                        'account':  param_prop['account']['default'],
                         'module':   param_prop['module']['default']
         }
 
@@ -69,6 +70,8 @@ class ConfParser:
                 self.set_param('queue', confs['queue'])
             elif conf_key == 'exeoutput':
                 self.set_param('exeoutput', confs['exeoutput'])
+            elif conf_key == 'account':
+                self.set_param('account', confs['account'])
             elif conf_key == 'module':
                 self.set_param('module', confs['module'])
             else:
@@ -103,6 +106,8 @@ class ConfParser:
             self._set_queue(val) 
         elif key == 'module':
             self._set_module(val) 
+        elif key == 'account':
+            self._set_account(val) 
         else:
             msg = "Error: %s type tag could not be identified."% key.upper()
             self.setting_error(msg)
@@ -130,6 +135,9 @@ class ConfParser:
     def _set_module(self, val):
         self._params['module'] = val
 
+    def _set_account(self, val):
+        self._params['account'] = val
+
     def _set_threads(self, val):
         self._params['threads'] = int(val)
 
@@ -148,11 +156,13 @@ class ConfParser:
     def _set_queue(self, val):
         self._params['queue'] = str(val).lower()
 
-    def _set_cores(self, val=None):
-        if val:
-            self._params['cores'] = val
-        else:
-            self._params['cores'] = 32*self._params['nodes']/self._params['threads']
+    #def _set_cores(self, val=None):
+    #    if val:
+    #        self._params['cores'] = val
+    #    else:
+    #        self._params['cores'] = 32*self._params['nodes']/self._params['threads']
+    def _set_cores(self, val):
+        self._params['cores'] = val
 
     def validate_params(self):
         pass
@@ -167,18 +177,43 @@ class ConfParser:
         if not is_submit:
             print "%s: Debug mode, job will not be submitted.\n"% exename.upper()
         
-    def validate_threads(self, ppn=32):
+    def validate_threads(self, host):
         threads  = self._params['threads']
+        if host.lower() == "titan":
+            ppn = 16
+        else:
+            ppn = 32
         if ppn%(threads):
             msg = "Error: OMP_NUM_THREADS is not set correctly, exit."
             self.setting_error(msg)
 
-    def validate_cores(self):
-        cores =  self._params['cores']
-        nodes =  self._params['nodes']
-        if cores > 32*nodes:
-            msg =  "Error: Cores exceeds maximum limit set by nodes, exit."
+    def validate_account(self, host):
+        account = self._params['account']
+        if host.lower() == 'titan':
+            all_accounts = ['nti108', 'mat049']
+        elif host.lower() == "cades":
+            all_accounts == ["sns"]
+        elif host.lower() == "bluewaters":
+            all_accounts == ["baec"]
+
+        if account not in all_accounts:
+            msg = "Error: ACCOUNT value not in the list, exit."
             self.setting_error(msg)
+
+    def validate_cores(self, host):
+        nodes =  self._params['nodes']
+        cores =  self._params['cores']
+        if host.lower() == "titan":
+            ppn = 16
+        else:
+            ppn = 32
+
+        if not cores:
+            self._set_cores(ppn*nodes)
+        else:
+            if cores > ppn*nodes:
+                msg =  "Error: Cores exceeds maximum limit set by nodes, exit."
+                self.setting_error(msg)
 
     def validate_exepath(self):
         rmg_exe_list = ['rmg-cpu']
@@ -281,6 +316,8 @@ class ConfParser:
             self._validate_queue_cades(queue, time)
         elif host == "BlueWaters":
             self._validate_queue_bw(queue, time)
+        if host == "Titan":
+            self._validate_queue_titan(queue, time)
         else:
             msg = "Unknown host: %s, exit"% host
             self.setting_error(msg)
@@ -298,6 +335,14 @@ class ConfParser:
         else:
             queue = all_queues[0]
             #print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
+        self._params['queue'] = queue
+
+    def _validate_queue_titan(self, queue, time):
+        all_queues = ['batch', 'debug', 'killable']
+        if queue.lower() == "debug":
+            queue = all_queues[1]
+        else:
+            queue = all_queues[0]
         self._params['queue'] = queue
 
     def _validate_queue_bw(self, queue, time):
@@ -322,6 +367,7 @@ def write_pbs(init_env, pbs_conf):
     name     = pbs_conf._params['name']
     queue    = pbs_conf._params['queue']
     exepath  = pbs_conf._params['exepath']
+    account  = pbs_conf._params['account']
     exeinput = pbs_conf._params['exeinput']
     exeoutput= pbs_conf._params['exeoutput']
     exename  = pbs_conf._params['exename']
@@ -330,7 +376,10 @@ def write_pbs(init_env, pbs_conf):
 
     # convert to pbs format
     pwd         = os.path.join(init_env.get_pwd(), pbs_conf._workdir)
-    ppn_use     = divmod(32, threads)[0]
+    if init_env.get_host().lower() == "titan":
+        ppn_use     = divmod(16, threads)[0]
+    else:
+        ppn_use     = divmod(32, threads)[0]
     time_pbs    = "%02d:%02d:00"%(time[0], time[1])
 
     module_pbs = ""
@@ -346,6 +395,7 @@ def write_pbs(init_env, pbs_conf):
                 'exename':      exename,
                 'cores':        cores,
                 'exepath':      exepath,
+                'account':      account,
                 'exeinput':     exeinput,
                 'module':       module_pbs,
                 'exeoutput':    exeoutput,
@@ -358,6 +408,10 @@ def write_pbs(init_env, pbs_conf):
     elif init_env.get_host() == "BlueWaters":
         from hosts import bluewaters
         lines_pbs = bluewaters.get_pbs_lines(pbs_dict)
+
+    elif init_env.get_host() == "Titan":
+        from hosts import titan
+        lines_pbs = titan.get_pbs_lines(pbs_dict)
 
     with open(os.path.join(pwd, 'pbs.%s'% exename.lower()), 'wb') as f:
         f.write(lines_pbs)

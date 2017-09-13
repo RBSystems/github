@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#PBS -A nti108
+#PBS -q debug
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -l walltime=00:30:00
+#PBS -l nodes=1
+#PBS -N pbstool.debug@/autofs/nccs-svm1_home1/z8j/github/pbstool/tests/debug/2017-09-13-15-43-57
+
+source $MODULESHOME/init/bash
+module swap PrgEnv-pgi PrgEnv-gnu
+module list
+
+setenv OMP_NUM_THREADS 1
+
+
+cd /autofs/nccs-svm1_home1/z8j/github/pbstool/tests/debug/2017-09-13-15-43-57
+
+date
+
+aprun -n 16 -N 16 -d 1 /ccs/home/z8j/bin/rmg-cpu rmg.in > rmg.00.out
+
+date

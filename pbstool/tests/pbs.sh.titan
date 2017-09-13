@@ -1,0 +1,28 @@
+#! /bin/bash
+
+#PBS -A NTI108
+####PBS -A MAT049STR
+#####PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -l walltime=1:00:00
+#PBS -l nodes=16
+#PBS -N carb-rlx-rmg.test
+
+source $MODULESHOME/init/bash
+module list
+
+setenv OMP_NUM_THREADS 1
+#export OMP_NUM_THREADS 1
+
+cd $PBS_O_WORKDIR
+
+date
+
+aprun -n 256 /ccs/home/z8j/bin/rmg-cpu rmg.in
+#aprun -n 256 -N 32 -d 1 /ccs/home/z8j/bin/rmg-cpu rmg.in
+#mpirun -n 256 ~/public/rmg-cpu rmg.in
+
+date
+

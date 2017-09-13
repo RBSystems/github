@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#PBS -A NTI108
+#PBS -q debug
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -l walltime=00:30:00
+#PBS -l nodes=1:ppn=32:xe
+#PBS -N pbstool.debug@/autofs/nccs-svm1_home1/z8j/github/pbstool/tests/debug/2017-09-13-15-10-13
+
+source /opt/modules/default/init/bash
+module swap PrgEnv-cray PrgEnv-gnu
+module list
+
+export OMP_NUM_THREADS=1
+
+export MPICH_MAX_THREAD_SAFETY=serialized
+export OMP_WAIT_POLICY=passive
+export MPICH_ENV_DISPLAY=1
+export MPICH_ALLREDUCE_NO_SMP=1
+ulimit -a
+export CRAY_CUDA_PROXY=1
+export MPICH_UNEX_BUFFER_SIZE=362914560
+export MPICH_MAX_SHORT_MSG_SIZE=3200
+
+cd /autofs/nccs-svm1_home1/z8j/github/pbstool/tests/debug/2017-09-13-15-10-13
+
+date
+
+aprun -n 32 -N 32 -d 1 -cc numa_node /ccs/home/z8j/bin/rmg-cpu rmg.in > rmg.00.out
+
+date
