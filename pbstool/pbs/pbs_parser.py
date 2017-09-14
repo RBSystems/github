@@ -192,9 +192,9 @@ class ConfParser:
         if host.lower() == 'titan':
             all_accounts = ['nti108', 'mat049']
         elif host.lower() == "cades":
-            all_accounts == ["sns"]
+            all_accounts = ["sns"]
         elif host.lower() == "bluewaters":
-            all_accounts == ["baec"]
+            all_accounts = ["baec"]
 
         if account not in all_accounts:
             msg = "Error: ACCOUNT value not in the list, exit."
@@ -316,7 +316,7 @@ class ConfParser:
             self._validate_queue_cades(queue, time)
         elif host == "BlueWaters":
             self._validate_queue_bw(queue, time)
-        if host == "Titan":
+        elif host == "Titan":
             self._validate_queue_titan(queue, time)
         else:
             msg = "Unknown host: %s, exit"% host
