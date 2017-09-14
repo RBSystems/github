@@ -207,6 +207,7 @@ if __name__ == "__main__":
     all_dir = []
     for (dirpath, dirnames, filenames) in os.walk(pwd):
         all_dir.extend(dirnames)
+        break
 
     for this_dir in all_dir:
         if this_dir in pbs_conf['exclude']:
