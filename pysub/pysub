@@ -206,6 +206,7 @@ if __name__ == "__main__":
 
     all_dir = []
     for (dirpath, dirnames, filenames) in os.walk(pwd):
+        dirnames.sort()
         all_dir.extend(dirnames)
         break
 

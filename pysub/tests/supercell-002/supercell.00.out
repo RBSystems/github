@@ -1,0 +1,639 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Auto processor grid settings: npes=256 PE_X=8 PE_Y=8 PE_Z=4
+RMG running with 1 threads set via OMP_NUM_THREADS.
+
+               * * * * * * * * * *
+               *    R   M   G    *
+               * * * * * * * * * *
+
+ -- A Real Space Multigrid Electronic structure code --
+ --      More information at www.rmgdft.org          --
+Remapping coarse grids for parallel fft.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+Warning: too many multigrid levels were requested 1 times.
+
+ quench: [md:   0/500  scf:   0/500  step time:  32.16  scf time:    32.16 secs  RMS[dV]: 1.80e-02 ]
+ quench: [md:   0/500  scf:   1/500  step time:  38.13  scf time:    70.29 secs  RMS[dV]: 3.33e-02 ]
+ quench: [md:   0/500  scf:   2/500  step time:  36.73  scf time:   107.02 secs  RMS[dV]: 2.83e-02 ]
+ quench: [md:   0/500  scf:   3/500  step time:  38.81  scf time:   145.83 secs  RMS[dV]: 1.80e-02 ]
+ quench: [md:   0/500  scf:   4/500  step time:  35.99  scf time:   181.82 secs  RMS[dV]: 9.64e-03 ]
+ quench: [md:   0/500  scf:   5/500  step time:  31.39  scf time:   213.21 secs  RMS[dV]: 5.25e-03 ]
+ quench: [md:   0/500  scf:   6/500  step time:  31.29  scf time:   244.50 secs  RMS[dV]: 3.13e-03 ]
+ quench: [md:   0/500  scf:   7/500  step time:  36.65  scf time:   281.15 secs  RMS[dV]: 8.94e-04 ]
+ quench: [md:   0/500  scf:   8/500  step time:  33.14  scf time:   314.29 secs  RMS[dV]: 1.44e-03 ]
+ quench: [md:   0/500  scf:   9/500  step time:  31.31  scf time:   345.60 secs  RMS[dV]: 2.83e-03 ]
+ quench: [md:   0/500  scf:  10/500  step time:  32.34  scf time:   377.95 secs  RMS[dV]: 2.51e-03 ]
+ quench: [md:   0/500  scf:  11/500  step time:  31.67  scf time:   409.62 secs  RMS[dV]: 1.11e-03 ]
+ quench: [md:   0/500  scf:  12/500  step time:  33.62  scf time:   443.24 secs  RMS[dV]: 2.74e-04 ]
+ quench: [md:   0/500  scf:  13/500  step time:  36.91  scf time:   480.15 secs  RMS[dV]: 4.40e-04 ]
+ quench: [md:   0/500  scf:  14/500  step time:  30.18  scf time:   510.33 secs  RMS[dV]: 7.14e-04 ]
+ quench: [md:   0/500  scf:  15/500  step time:  37.12  scf time:   547.45 secs  RMS[dV]: 9.26e-04 ]
+ quench: [md:   0/500  scf:  16/500  step time:  37.37  scf time:   584.83 secs  RMS[dV]: 1.26e-03 ]
+ quench: [md:   0/500  scf:  17/500  step time:  35.15  scf time:   619.98 secs  RMS[dV]: 1.40e-03 ]
+ quench: [md:   0/500  scf:  18/500  step time:  31.17  scf time:   651.15 secs  RMS[dV]: 8.69e-04 ]
+ quench: [md:   0/500  scf:  19/500  step time:  33.00  scf time:   684.15 secs  RMS[dV]: 3.48e-04 ]
+ quench: [md:   0/500  scf:  20/500  step time:  32.07  scf time:   716.22 secs  RMS[dV]: 1.51e-04 ]
+ quench: [md:   0/500  scf:  21/500  step time:  29.67  scf time:   745.89 secs  RMS[dV]: 5.70e-05 ]
+ quench: [md:   0/500  scf:  22/500  step time:  32.59  scf time:   778.49 secs  RMS[dV]: 1.16e-04 ]
+ quench: [md:   0/500  scf:  23/500  step time:  34.95  scf time:   813.43 secs  RMS[dV]: 5.64e-05 ]
+ quench: [md:   0/500  scf:  24/500  step time:  32.87  scf time:   846.31 secs  RMS[dV]: 3.03e-05 ]
+ quench: [md:   0/500  scf:  25/500  step time:  33.88  scf time:   880.19 secs  RMS[dV]: 6.84e-05 ]
+ quench: [md:   0/500  scf:  26/500  step time:  36.76  scf time:   916.94 secs  RMS[dV]: 5.34e-05 ]
+ quench: [md:   0/500  scf:  27/500  step time:  36.00  scf time:   952.94 secs  RMS[dV]: 5.18e-05 ]
+ quench: [md:   0/500  scf:  28/500  step time:  34.21  scf time:   987.15 secs  RMS[dV]: 2.90e-05 ]
+ quench: [md:   0/500  scf:  29/500  step time:  36.37  scf time:  1023.52 secs  RMS[dV]: 2.58e-05 ]
+ quench: [md:   0/500  scf:  30/500  step time:  34.51  scf time:  1058.03 secs  RMS[dV]: 3.44e-05 ]
+ quench: [md:   0/500  scf:  31/500  step time:  33.13  scf time:  1091.16 secs  RMS[dV]: 6.52e-05 ]
+ quench: [md:   0/500  scf:  32/500  step time:  33.67  scf time:  1124.83 secs  RMS[dV]: 5.49e-05 ]
+ quench: [md:   0/500  scf:  33/500  step time:  33.10  scf time:  1157.93 secs  RMS[dV]: 3.38e-05 ]
+ quench: [md:   0/500  scf:  34/500  step time:  31.59  scf time:  1189.52 secs  RMS[dV]: 1.35e-05 ]
+ quench: [md:   0/500  scf:  35/500  step time:  32.32  scf time:  1221.85 secs  RMS[dV]: 6.19e-06 ]
+ quench: [md:   0/500  scf:  36/500  step time:  31.48  scf time:  1253.33 secs  RMS[dV]: 6.79e-06 ]
+ quench: [md:   0/500  scf:  37/500  step time:  35.12  scf time:  1288.44 secs  RMS[dV]: 7.13e-06 ]
+ quench: [md:   0/500  scf:  38/500  step time:  37.17  scf time:  1325.61 secs  RMS[dV]: 9.23e-06 ]
+ quench: [md:   0/500  scf:  39/500  step time:  40.81  scf time:  1366.43 secs  RMS[dV]: 2.79e-05 ]
+ quench: [md:   0/500  scf:  40/500  step time:  37.43  scf time:  1403.86 secs  RMS[dV]: 4.06e-05 ]
+ quench: [md:   0/500  scf:  41/500  step time:  34.07  scf time:  1437.93 secs  RMS[dV]: 5.69e-05 ]
+ quench: [md:   0/500  scf:  42/500  step time:  37.87  scf time:  1475.80 secs  RMS[dV]: 7.05e-05 ]
+ quench: [md:   0/500  scf:  43/500  step time:  33.28  scf time:  1509.08 secs  RMS[dV]: 9.26e-05 ]
+ quench: [md:   0/500  scf:  44/500  step time:  34.96  scf time:  1544.04 secs  RMS[dV]: 8.23e-05 ]
+ quench: [md:   0/500  scf:  45/500  step time:  36.04  scf time:  1580.08 secs  RMS[dV]: 4.02e-05 ]
+ quench: [md:   0/500  scf:  46/500  step time:  36.11  scf time:  1616.19 secs  RMS[dV]: 1.90e-05 ]
+ quench: [md:   0/500  scf:  47/500  step time:  37.99  scf time:  1654.19 secs  RMS[dV]: 4.03e-06 ]
+ quench: [md:   0/500  scf:  48/500  step time:  35.08  scf time:  1689.26 secs  RMS[dV]: 9.41e-06 ]
+ quench: [md:   0/500  scf:  49/500  step time:  34.07  scf time:  1723.33 secs  RMS[dV]: 1.59e-05 ]
+ quench: [md:   0/500  scf:  50/500  step time:  33.37  scf time:  1756.70 secs  RMS[dV]: 1.88e-05 ]
+ quench: [md:   0/500  scf:  51/500  step time:  33.73  scf time:  1790.43 secs  RMS[dV]: 4.83e-06 ]
+ quench: [md:   0/500  scf:  52/500  step time:  36.73  scf time:  1827.15 secs  RMS[dV]: 1.69e-05 ]
+ quench: [md:   0/500  scf:  53/500  step time:  34.06  scf time:  1861.21 secs  RMS[dV]: 1.15e-05 ]
+ quench: [md:   0/500  scf:  54/500  step time:  39.42  scf time:  1900.63 secs  RMS[dV]: 9.24e-06 ]
+ quench: [md:   0/500  scf:  55/500  step time:  36.33  scf time:  1936.97 secs  RMS[dV]: 2.62e-06 ]
+ quench: [md:   0/500  scf:  56/500  step time:  32.87  scf time:  1969.83 secs  RMS[dV]: 5.96e-07 ]
+ quench: [md:   0/500  scf:  57/500  step time:  31.49  scf time:  2001.32 secs  RMS[dV]: 2.73e-06 ]
+ quench: [md:   0/500  scf:  58/500  step time:  38.32  scf time:  2039.64 secs  RMS[dV]: 4.96e-06 ]
+ quench: [md:   0/500  scf:  59/500  step time:  36.57  scf time:  2076.21 secs  RMS[dV]: 6.10e-06 ]
+ quench: [md:   0/500  scf:  60/500  step time:  30.95  scf time:  2107.17 secs  RMS[dV]: 5.53e-06 ]
+ quench: [md:   0/500  scf:  61/500  step time:  34.75  scf time:  2141.91 secs  RMS[dV]: 2.17e-06 ]
+ quench: [md:   0/500  scf:  62/500  step time:  32.96  scf time:  2174.88 secs  RMS[dV]: 7.87e-07 ]
+ quench: [md:   0/500  scf:  63/500  step time:  32.08  scf time:  2206.96 secs  RMS[dV]: 4.32e-07 ]
+ quench: [md:   0/500  scf:  64/500  step time:  34.69  scf time:  2241.64 secs  RMS[dV]: 1.17e-06 ]
+ quench: [md:   0/500  scf:  65/500  step time:  36.26  scf time:  2277.90 secs  RMS[dV]: 2.11e-06 ]
+ quench: [md:   0/500  scf:  66/500  step time:  32.46  scf time:  2310.36 secs  RMS[dV]: 2.92e-06 ]
+ quench: [md:   0/500  scf:  67/500  step time:  33.98  scf time:  2344.34 secs  RMS[dV]: 4.02e-06 ]
+ quench: [md:   0/500  scf:  68/500  step time:  36.40  scf time:  2380.75 secs  RMS[dV]: 4.55e-06 ]
+ quench: [md:   0/500  scf:  69/500  step time:  34.29  scf time:  2415.04 secs  RMS[dV]: 5.40e-06 ]
+ quench: [md:   0/500  scf:  70/500  step time:  35.81  scf time:  2450.85 secs  RMS[dV]: 6.80e-06 ]
+ quench: [md:   0/500  scf:  71/500  step time:  31.37  scf time:  2482.22 secs  RMS[dV]: 4.35e-06 ]
+ quench: [md:   0/500  scf:  72/500  step time:  32.73  scf time:  2514.95 secs  RMS[dV]: 1.51e-06 ]
+ quench: [md:   0/500  scf:  73/500  step time:  34.83  scf time:  2549.78 secs  RMS[dV]: 2.92e-07 ]
+ quench: [md:   0/500  scf:  74/500  step time:  34.12  scf time:  2583.90 secs  RMS[dV]: 9.65e-07 ]
+ quench: [md:   0/500  scf:  75/500  step time:  32.02  scf time:  2615.92 secs  RMS[dV]: 2.62e-06 ]
+ quench: [md:   0/500  scf:  76/500  step time:  34.53  scf time:  2650.45 secs  RMS[dV]: 3.19e-06 ]
+ quench: [md:   0/500  scf:  77/500  step time:  32.78  scf time:  2683.23 secs  RMS[dV]: 4.40e-06 ]
+ quench: [md:   0/500  scf:  78/500  step time:  41.19  scf time:  2724.42 secs  RMS[dV]: 1.58e-06 ]
+ quench: [md:   0/500  scf:  79/500  step time:  34.18  scf time:  2758.60 secs  RMS[dV]: 6.31e-07 ]
+ quench: [md:   0/500  scf:  80/500  step time:  32.60  scf time:  2791.20 secs  RMS[dV]: 1.15e-06 ]
+ quench: [md:   0/500  scf:  81/500  step time:  34.70  scf time:  2825.90 secs  RMS[dV]: 2.25e-06 ]
+ quench: [md:   0/500  scf:  82/500  step time:  33.30  scf time:  2859.21 secs  RMS[dV]: 3.73e-06 ]
+ quench: [md:   0/500  scf:  83/500  step time:  35.09  scf time:  2894.30 secs  RMS[dV]: 5.39e-06 ]
+ quench: [md:   0/500  scf:  84/500  step time:  33.50  scf time:  2927.80 secs  RMS[dV]: 4.57e-06 ]
+ quench: [md:   0/500  scf:  85/500  step time:  35.96  scf time:  2963.76 secs  RMS[dV]: 3.45e-06 ]
+ quench: [md:   0/500  scf:  86/500  step time:  30.72  scf time:  2994.48 secs  RMS[dV]: 8.86e-07 ]
+ quench: [md:   0/500  scf:  87/500  step time:  34.61  scf time:  3029.09 secs  RMS[dV]: 2.78e-07 ]
+ quench: [md:   0/500  scf:  88/500  step time:  35.86  scf time:  3064.95 secs  RMS[dV]: 2.87e-06 ]
+ quench: [md:   0/500  scf:  89/500  step time:  33.37  scf time:  3098.31 secs  RMS[dV]: 4.37e-06 ]
+ quench: [md:   0/500  scf:  90/500  step time:  35.97  scf time:  3134.28 secs  RMS[dV]: 4.79e-06 ]
+ quench: [md:   0/500  scf:  91/500  step time:  32.01  scf time:  3166.29 secs  RMS[dV]: 5.99e-06 ]
+ quench: [md:   0/500  scf:  92/500  step time:  39.67  scf time:  3205.96 secs  RMS[dV]: 2.91e-06 ]
+ quench: [md:   0/500  scf:  93/500  step time:  32.93  scf time:  3238.89 secs  RMS[dV]: 1.62e-06 ]
+ quench: [md:   0/500  scf:  94/500  step time:  37.37  scf time:  3276.26 secs  RMS[dV]: 2.10e-06 ]
+ quench: [md:   0/500  scf:  95/500  step time:  34.73  scf time:  3310.99 secs  RMS[dV]: 4.37e-06 ]
+ quench: [md:   0/500  scf:  96/500  step time:  37.83  scf time:  3348.82 secs  RMS[dV]: 7.27e-06 ]
+ quench: [md:   0/500  scf:  97/500  step time:  33.66  scf time:  3382.48 secs  RMS[dV]: 8.29e-06 ]
+ quench: [md:   0/500  scf:  98/500  step time:  33.63  scf time:  3416.11 secs  RMS[dV]: 2.27e-06 ]
+ quench: [md:   0/500  scf:  99/500  step time:  34.51  scf time:  3450.62 secs  RMS[dV]: 4.15e-06 ]
+ quench: [md:   0/500  scf: 100/500  step time:  35.51  scf time:  3486.13 secs  RMS[dV]: 3.70e-06 ]
+ quench: [md:   0/500  scf: 101/500  step time:  37.42  scf time:  3523.54 secs  RMS[dV]: 7.64e-07 ]
+ quench: [md:   0/500  scf: 102/500  step time:  31.85  scf time:  3555.40 secs  RMS[dV]: 9.11e-07 ]
+ quench: [md:   0/500  scf: 103/500  step time:  35.82  scf time:  3591.22 secs  RMS[dV]: 1.21e-06 ]
+ quench: [md:   0/500  scf: 104/500  step time:  38.74  scf time:  3629.96 secs  RMS[dV]: 3.70e-06 ]
+ quench: [md:   0/500  scf: 105/500  step time:  33.31  scf time:  3663.27 secs  RMS[dV]: 3.12e-06 ]
+ quench: [md:   0/500  scf: 106/500  step time:  34.83  scf time:  3698.10 secs  RMS[dV]: 1.97e-06 ]
+ quench: [md:   0/500  scf: 107/500  step time:  33.98  scf time:  3732.08 secs  RMS[dV]: 7.17e-07 ]
+ quench: [md:   0/500  scf: 108/500  step time:  34.52  scf time:  3766.60 secs  RMS[dV]: 1.77e-07 ]
+ quench: [md:   0/500  scf: 109/500  step time:  38.52  scf time:  3805.11 secs  RMS[dV]: 6.64e-08 ]
+ quench: [md:   0/500  scf: 110/500  step time:  35.79  scf time:  3840.91 secs  RMS[dV]: 1.29e-07 ]
+ quench: [md:   0/500  scf: 111/500  step time:  39.69  scf time:  3880.60 secs  RMS[dV]: 5.53e-08 ]
+ quench: [md:   0/500  scf: 112/500  step time:  32.34  scf time:  3912.93 secs  RMS[dV]: 1.16e-07 ]
+ quench: [md:   0/500  scf: 113/500  step time:  40.87  scf time:  3953.80 secs  RMS[dV]: 3.81e-08 ]
+ Convergence criterion reached: potential RMS (6.55e-09) is lower than threshold (1.00e-08)
+ quench: [md:   0/500  scf: 114/500  step time:  33.64  scf time:  3987.44 secs  RMS[dV]: 6.55e-09 ]
