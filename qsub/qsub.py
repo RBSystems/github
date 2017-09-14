@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
-# Program: submit pbs jobs for virtues under limitation of procs etc
+'''
+    Program: submit pbs jobs for virtues under limitation of procs etc
+
+    TODO:
+        1. add regular expression option for excluded dirs
+'''
 
 import os
 import sys
@@ -24,6 +29,9 @@ def read_conf(conf_file):
         elif "sleep" in line.lower():
             values = line.split('=')[-1]
             pbs_conf['sleep'] = float(values)
+        elif "file_pbs" in line.lower():
+            values = line.split('=')[-1]
+            pbs_conf['file_pbs'] = str(values)
         elif "user_id" in line.lower():
             values = line.split('=')[-1].split()[0]
             pbs_conf['user_id'] = str(values)
@@ -208,37 +216,31 @@ if __name__ == "__main__":
         os.chdir(work_dir)
 
         if pbs_conf['max_nodes'] == 0:
-            os.system('qsub %s'%( file_pbs))
+            os.system('qsub %s'%( pbs_conf['file_pbs']))
         else:
             queued_nodes = get_queued_nodes()
             running_nodes = get_running_nodes()
-            # need to decide which way is better
             while (queued_nodes + running_nodes) > pbs_conf['max_nodes']:
-            #while run_procs > max_procs:
                 time_tmp = time.strftime(time_format, time.localtime())
-                sleep_info = ('%s@%s: Running + queued nodes:%5d.'
-                          ' Sleeping for [%4d] secs...'
+                sleep_msg = ('%s@%s: Running + queued nodes:%5d. Sleeping for [%4d] secs...'
                             %(time_tmp, this_dir, queued_nodes+running_nodes, pbs_conf['sleep']))
-                print sleep_info
-                os.system("echo %s >> %s"%(sleep_info, file_log))
+                print sleep_msg
+                os.system("echo %s >> %s"%(sleep_msg, file_log))
                 time.sleep(pbs_conf['sleep'])
 
                 queued_noeds = get_queued_nodes()
                 running_nodes = get_running_nodes()
-                # need to decide which way is better
-                #req_procs = get_req_procs()
 
-            if not os.path.exists(pbs.conf['ignore_if_existed']):
-                if os.path.exists('./supercell.in.*'):
-                    os.system('rm supercell.in.*')
-                os.system('qsub %s'% file_pbs)
-                sub_info = ('Job for %s is submitted.'% this_dir)
-                os.system("echo %s >> %s"%(sub_info, file_log))
+            if not pbs_conf['ignore_if_existed'] or ( not os.path.exists(pbs_conf['ignore_if_existed'])):
+                #if os.path.exists('./supercell.in.*'):
+                #    os.system('rm supercell.in.*')
+                os.system('qsub %s'% pbs_conf['file_pbs'])
+                sub_msg = ('Job for %s is submitted.'% this_dir)
+                os.system("echo %s >> %s"%(sub_msg, file_log))
                 # submitted jobs info delay
                 time.sleep(30)
 
-        submitted_job_count += 1
+        submitted_job_counter += 1
 
     print ('\n\n\n All jobs submitted: %d\n'% submitted_job_counter)
-
     os.system("echo %s >> %s"%('Done!', file_log))

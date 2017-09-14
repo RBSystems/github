@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Program: submit pbs jobs for virtues under limitation of procs etc
+# convergence test scripts
 
 import os
 import sys
