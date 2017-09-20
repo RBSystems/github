@@ -4,12 +4,13 @@
     Program: submit pbs jobs for virtues under limitation of procs etc
 
     TODO:
-        1. add regular expression option for excluded dirs
+        1. add regular expression option for excluded dirs-by using re module
 '''
 
 import os
 import sys
 import time
+import re
 
 # read conf file
 def read_conf(conf_file):
@@ -185,7 +186,8 @@ if __name__ == "__main__":
     pbs_conf = {"file_pbs": "pbs.sh",
                 "exclude": None,
                 "name_log": "log.pbs",
-                "max_nodes": 1e10,
+                "max_nodes": -1,
+                "max_jobs": -1,
                 "ignore_if_existed": None,
                 "sleep": 0
                 }
@@ -193,9 +195,13 @@ if __name__ == "__main__":
     # read control file
     if len(sys.argv) > 1:
         pbs_conf_file = sys.argv[-1]
+        read_conf(pbs_conf_file)
     else:
-        pbs_conf_file = "qsub.conf"
-    read_conf(pbs_conf_file)
+        if os.path.isfile('qsub.conf'):
+            pbs_conf_file = "qsub.conf"
+            read_conf(pbs_conf_file)
+
+    print pbs_conf; exit()
 
     # set default time format
     time_format='%Y-%m-%d %X'
@@ -217,7 +223,7 @@ if __name__ == "__main__":
         work_dir = os.path.join(pwd, this_dir)
         os.chdir(work_dir)
 
-        if pbs_conf['max_nodes'] == 0:
+        if pbs_conf['max_nodes'] < 0:
             os.system('qsub %s'%( pbs_conf['file_pbs']))
         else:
             queued_nodes = get_queued_nodes()
