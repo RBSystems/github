@@ -229,22 +229,30 @@ if __name__ == "__main__":
         else:
             print "Use program internal qsub parameters\n"
 
+########################
+# default variables
+########################
     # set default time format
     time_format='%Y-%m-%d %X'
     submitted_job_counter = 0
 
+    # log of qsub
     pwd = os.getcwd()
     file_log = os.path.join(pwd, pbs_conf['name_log'])
 
+    # get all directories in pwd
     all_dir = []
     for (dirpath, dirnames, filenames) in os.walk(pwd):
         dirnames.sort()
         all_dir.extend(dirnames)
         break
 
-    #exclude_pattern = re.compile()
+
+########################
+# submit jobs
+########################
     for this_dir in all_dir:
-        # check if excluded
+        # check if excluded by tag: exclude
         excluded = False
         if pbs_conf['exclude']:
             for this_exclude in pbs_conf['exclude']:
@@ -253,8 +261,6 @@ if __name__ == "__main__":
 
         if excluded:
             continue
-        #if this_dir in pbs_conf['exclude']:
-        #    continue
 
         work_dir = os.path.join(pwd, this_dir)
         os.chdir(work_dir)
