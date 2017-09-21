@@ -36,6 +36,9 @@ def read_conf(conf_file):
         elif "user_id" in line.lower():
             values = line.split('=')[-1].split()[0]
             pbs_conf['user_id'] = str(values)
+        elif "ignore_if_existed" in line.lower():
+            values = line.split('=')[-1].split()
+            pbs_conf['ignore_if_existed'] = values
 
 # get total number of current active procs
 def get_queued_nodes():
@@ -256,6 +259,16 @@ if __name__ == "__main__":
         work_dir = os.path.join(pwd, this_dir)
         os.chdir(work_dir)
 
+        # check if ignored by tag: ignored_if_existed
+        if pbs_conf['ignore_if_existed']:
+            for this_ignore in pbs_conf['ignore_if_existed']:
+                for this_file in os.listdir(os.getcwd()):
+                    if re.search(this_ignore, this_file):
+                        excluded = True
+
+        if excluded:
+            continue
+
         if pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] < 0:
             #os.system('qsub %s'%( pbs_conf['file_pbs']))
             print this_dir
@@ -275,14 +288,11 @@ if __name__ == "__main__":
                 running_nodes = get_running_nodes()
                 num_jobs = get_num_jobs()
 
-            if not pbs_conf['ignore_if_existed'] or ( not os.path.exists(pbs_conf['ignore_if_existed'])):
-                #if os.path.exists('./supercell.in.*'):
-                #    os.system('rm supercell.in.*')
-                os.system('qsub %s'% pbs_conf['file_pbs'])
-                sub_msg = ('Job for %s is submitted.'% this_dir)
-                os.system("echo %s >> %s"%(sub_msg, file_log))
-                # submitted jobs info delay
-                time.sleep(30)
+            os.system('qsub %s'% pbs_conf['file_pbs'])
+            sub_msg = ('Job for %s is submitted.'% this_dir)
+            os.system("echo %s >> %s"%(sub_msg, file_log))
+            # submitted jobs info delay
+            time.sleep(30)
 
         submitted_job_counter += 1
 

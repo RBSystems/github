@@ -203,16 +203,17 @@ class ConfParser:
     def validate_cores(self, host):
         nodes =  self._params['nodes']
         cores =  self._params['cores']
+        threads =  self._params['threads']
         if host.lower() == "titan":
             ppn = 16
         else:
             ppn = 32
 
         if not cores:
-            self._set_cores(ppn*nodes)
+            self._set_cores(ppn*nodes/threads)
         else:
-            if cores > ppn*nodes:
-                msg =  "Error: Cores exceeds maximum limit set by nodes, exit."
+            if cores > ppn*nodes/threads:
+                msg =  "Error: Cores exceeds maximum limit set by nodes/threads, exit."
                 self.setting_error(msg)
 
     def validate_exepath(self):
