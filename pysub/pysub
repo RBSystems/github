@@ -79,6 +79,27 @@ def get_running_nodes():
 
     return nodes_tmp
 
+# get total number of running/queued jobs
+def get_num_jobs():
+
+    jobs_tmp = 0
+    time_format='%Y%m%d%H%M%S'
+    time_tmp = time.strftime(time_format, time.localtime())
+    file_tmp = 'tmp.qi.%s'% time_tmp
+
+    os.system("qstat -u z8j > %s"%(file_tmp))
+
+    with open('%s'% file_tmp) as f:
+        lines = f.readlines()
+
+    for line in lines:
+        if ('z8j' in line) and (line.split()[-2] == 'R' or line.split()[-2] == 'Q'):
+           jobs_tmp += 1
+
+    os.system('rm %s'%(file_tmp))
+
+    return jobs_tmp
+
 # read procs to be requested
 def get_req_procs():
 
@@ -184,7 +205,7 @@ class PbsIn():
 if __name__ == "__main__":
 
     pbs_conf = {"file_pbs": "pbs.sh",
-                "exclude": [],
+                "exclude": None,
                 "name_log": "log.pbs",
                 "max_nodes": -1,
                 "max_jobs": -1,
@@ -199,7 +220,7 @@ if __name__ == "__main__":
         read_conf(pbs_conf_file)
     else:
         if os.path.isfile('qsub.conf'):
-            print "Use default qsub control file in current working directory: %s\n"% sys.argv[-1]
+            print "Use default qsub control file in current working directory: %s\n"% 'qsub.conf'
             pbs_conf_file = "qsub.conf"
             read_conf(pbs_conf_file)
         else:
@@ -218,29 +239,41 @@ if __name__ == "__main__":
         all_dir.extend(dirnames)
         break
 
+    #exclude_pattern = re.compile()
     for this_dir in all_dir:
-        if this_dir in pbs_conf['exclude']:
+        # check if excluded
+        excluded = False
+        if pbs_conf['exclude']:
+            for this_exclude in pbs_conf['exclude']:
+                if re.search(this_exclude, this_dir):
+                    excluded = True
+
+        if excluded:
             continue
+        #if this_dir in pbs_conf['exclude']:
+        #    continue
 
         work_dir = os.path.join(pwd, this_dir)
         os.chdir(work_dir)
 
-        if pbs_conf['max_nodes'] < 0:
-            os.system('qsub %s'%( pbs_conf['file_pbs']))
-            #print this_dir
+        if pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] < 0:
+            #os.system('qsub %s'%( pbs_conf['file_pbs']))
+            print this_dir
         else:
             queued_nodes = get_queued_nodes()
             running_nodes = get_running_nodes()
-            while (queued_nodes + running_nodes) > pbs_conf['max_nodes']:
+            num_jobs = get_num_jobs()
+            while (queued_nodes + running_nodes) > pbs_conf['max_nodes'] or num_jobs > pbs_conf['max_jobs']:
                 time_tmp = time.strftime(time_format, time.localtime())
-                sleep_msg = ('%s@%s: Running + queued nodes:%5d. Sleeping for [%4d] secs...'
-                            %(time_tmp, this_dir, queued_nodes+running_nodes, pbs_conf['sleep']))
+                sleep_msg = ('%s@%s: Running + queued nodes:%5d, number of jobs: %5d. Sleeping for [%4d] secs...'
+                            %(time_tmp, this_dir, queued_nodes+running_nodes, num_jobs, pbs_conf['sleep']))
                 print sleep_msg
                 os.system("echo %s >> %s"%(sleep_msg, file_log))
                 time.sleep(pbs_conf['sleep'])
 
                 queued_noeds = get_queued_nodes()
                 running_nodes = get_running_nodes()
+                num_jobs = get_num_jobs()
 
             if not pbs_conf['ignore_if_existed'] or ( not os.path.exists(pbs_conf['ignore_if_existed'])):
                 #if os.path.exists('./supercell.in.*'):
