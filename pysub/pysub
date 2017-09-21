@@ -4,7 +4,7 @@
     Program: submit pbs jobs for virtues under limitation of procs etc
 
     TODO:
-        1. add regular expression option for excluded dirs-by using re module
+        1. try not to write and read qstat, it's not efficient
 '''
 
 import os
