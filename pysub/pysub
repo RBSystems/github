@@ -275,16 +275,55 @@ if __name__ == "__main__":
         if excluded:
             continue
 
+        # no limits at all
         if pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] < 0:
-            #os.system('qsub %s'%( pbs_conf['file_pbs']))
-            print this_dir
+            os.system('qsub %s'%( pbs_conf['file_pbs']))
+        # limit max_nodes
+        elif pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] < 0:
+            queued_nodes = get_queued_nodes()
+            running_nodes = get_running_nodes()
+            while (queued_nodes + running_nodes) > pbs_conf['max_nodes']:
+                time_tmp = time.strftime(time_format, time.localtime())
+                sleep_msg = ('%s@%s: %d nodes in use out of max limit %d. Sleeping for [%4d] secs...'
+                            %(time_tmp, this_dir, queued_nodes+running_nodes, pbs_conf['max_nodes'], pbs_conf['sleep']))
+                print sleep_msg
+                os.system("echo %s >> %s"%(sleep_msg, file_log))
+                time.sleep(pbs_conf['sleep'])
+
+                queued_noeds = get_queued_nodes()
+                running_nodes = get_running_nodes()
+
+            os.system('qsub %s'% pbs_conf['file_pbs'])
+            sub_msg = ('Job for %s is submitted.'% this_dir)
+            os.system("echo %s >> %s"%(sub_msg, file_log))
+            # submitted jobs info delay
+            time.sleep(30)
+        # limit max jobs
+        elif pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] > 0:
+            num_jobs = get_num_jobs()
+            while num_jobs > pbs_conf['max_jobs']:
+                time_tmp = time.strftime(time_format, time.localtime())
+                sleep_msg = ('%s@%s: %d jobs running out of max limit %d. Sleeping for [%4d] secs...'
+                            %(time_tmp, this_dir, num_jobs, pbs_conf['max_jobs'], pbs_conf['sleep']))
+                print sleep_msg
+                os.system("echo %s >> %s"%(sleep_msg, file_log))
+                time.sleep(pbs_conf['sleep'])
+
+                num_jobs = get_num_jobs()
+
+            os.system('qsub %s'% pbs_conf['file_pbs'])
+            sub_msg = ('Job for %s is submitted.'% this_dir)
+            os.system("echo %s >> %s"%(sub_msg, file_log))
+            # submitted jobs info delay
+            time.sleep(30)
+        # limit both
         else:
             queued_nodes = get_queued_nodes()
             running_nodes = get_running_nodes()
             num_jobs = get_num_jobs()
             while (queued_nodes + running_nodes) > pbs_conf['max_nodes'] or num_jobs > pbs_conf['max_jobs']:
                 time_tmp = time.strftime(time_format, time.localtime())
-                sleep_msg = ('%s@%s: Running + queued nodes:%5d, number of jobs: %5d. Sleeping for [%4d] secs...'
+                sleep_msg = ('%s@%s: nodes in use: %d, running jobs: %5d. Sleeping for [%4d] secs...'
                             %(time_tmp, this_dir, queued_nodes+running_nodes, num_jobs, pbs_conf['sleep']))
                 print sleep_msg
                 os.system("echo %s >> %s"%(sleep_msg, file_log))
