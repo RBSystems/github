@@ -218,7 +218,7 @@ class ConfParser:
 
     def validate_exepath(self):
         rmg_exe_list = ['rmg-cpu']
-        qe_exe_list = ['pw.x', 'phon']
+        qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x','phon']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
         castep_exe_list = ['castep.mpi']
         exepath  = self._params['exepath']
@@ -237,7 +237,7 @@ class ConfParser:
         elif exename in castep_exe_list:
             self._params['exename'] = 'CASTEP'
         else:
-            msg = "Error: unknown input file format, exit."
+            msg = "Error: unknown exe, exit."
             self.setting_error(msg)
             #print "EXE name: %s"% 'VASP'
 
