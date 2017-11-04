@@ -218,7 +218,7 @@ class ConfParser:
 
     def validate_exepath(self):
         rmg_exe_list = ['rmg-cpu']
-        qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x','phon']
+        qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x', 'lambda.x', 'epw.x', 'd3q.x', 'd3_q2r.x', 'd3_qq2rr.x', 'd3_asr3.x', 'd3_sparse.x', 'd3_lw.x', 'd3_tk.x']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
         castep_exe_list = ['castep.mpi']
         exepath  = self._params['exepath']
