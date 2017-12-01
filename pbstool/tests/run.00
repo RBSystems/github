@@ -16,4 +16,4 @@ ACCOUNT     = sns #nti108 #mat049
 # optional
 NAME        = pbstool.debug
 IS_SUBMIT   = false
-QUEUE       = debug
+QUEUE       = auto

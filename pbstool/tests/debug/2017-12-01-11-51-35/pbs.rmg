@@ -10,16 +10,16 @@
 #PBS -W group_list=cades-virtues
 #PBS -l walltime=100:30:00
 #PBS -l nodes=1:ppn=32
-#PBS -N pbstool.debug@/home/z8j/github/pbstool/tests
+#PBS -N pbstool.debug@/home/z8j/github/pbstool/tests/debug/2017-12-01-11-51-35
 
 module list
 
 export OMP_NUM_THREADS=1
 
-cd /home/z8j/github/pbstool/tests/
+cd /home/z8j/github/pbstool/tests/debug/2017-12-01-11-51-35
 
 date
 
-mpirun -np 32 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu rmg.in > rmg.00.out
+mpirun -np 32 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu rmg.in > rmg.01.out
 
 date

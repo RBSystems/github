@@ -11,7 +11,7 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "#PBS -M zjyx147@foxmail.com\n"
     lines_pbs += "#PBS -j oe\n"
     lines_pbs += "#PBS -o oe.$PBS_JOBID\n"
-    lines_pbs += "#PBS -l qos=long\n"
+    lines_pbs += "#PBS -l qos=%(queue)s\n"% pbs_dict
     lines_pbs += "#PBS -W group_list=cades-virtues\n"
     lines_pbs += "#PBS -l walltime=%(time)s\n" % pbs_dict
     lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32\n"% pbs_dict

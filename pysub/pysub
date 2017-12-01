@@ -253,7 +253,7 @@ if __name__ == "__main__":
 ########################
     for this_dir in all_dir:
         # print current direcotry
-        print "Current directory: %s"% this_dir
+        print "\nCurrent directory: %s"% this_dir
         # check if excluded by tag: exclude
         excluded = False
         if pbs_conf['exclude']:

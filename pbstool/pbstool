@@ -33,6 +33,7 @@ USAGE:
 
     1. if QUEUE is 'debug', then subdirectories will be created and jobs will
        be run in those directories.
+    2. if queue is 'auto', queue in pbs will be decided by wall time.
 
 '''
 
@@ -105,7 +106,9 @@ def validate_params(pbs_conf, init_env):
     # DO NOT change orders of following lines
     # BEWARE: exepath must be in front of exeinput
     #       queue be in front of name
+    #       output before queue
     pbs_conf.validate_exepath()
+    pbs_conf.validate_exeoutput()
     pbs_conf.validate_queue(init_env.get_host())
     pbs_conf.validate_name(init_env.get_pwd(), pbs_conf._workdir)
     pbs_conf.validate_is_submit()
@@ -113,7 +116,6 @@ def validate_params(pbs_conf, init_env):
     pbs_conf.validate_threads(init_env.get_host())
     pbs_conf.validate_account(init_env.get_host())
     pbs_conf.validate_exeinput()
-    pbs_conf.validate_exeoutput()
     pbs_conf.validate_module()
 
     # create sub directories

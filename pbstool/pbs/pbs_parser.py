@@ -298,8 +298,9 @@ class ConfParser:
             exeoutput_pre = self._params['exeinput'].split('.in')[0]
             i = 0
             #while os.path.isfile("%sy%02d"%(exeoutput_pre, i)):
-            while os.path.isfile("run.%02d"% i):
-                i += 1
+            if self._params['queue'] != 'debug':
+                while os.path.isfile("run.%02d"% i):
+                    i += 1
 
             exeoutput = "%s.%02d.out"%(exeoutput_pre, i)
             #if i:
@@ -325,17 +326,17 @@ class ConfParser:
 
     def _validate_queue_cades(self, queue, time):
         all_queues = ['batch', 'long']
-        if queue.lower() == 'debug':
-            queue = all_queues[0]
+        # only difference is that debug will run jobs in sub directories
+        if queue.lower() == 'debug' or queue.lower() == 'auto':
+            if time[0] > 48:
+                queue = all_queues[1]
+                #print "Walltime exceeds 48 hrs, queue is set to %s.\n"% queue
+            else:
+                queue = all_queues[0]
+                #print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
         elif queue != 'none' and queue not in all_queues:
             msg = "Queue error, exit."
             self.setting_error(msg)
-        if time[0] > 48:
-            queue = all_queues[1]
-            #print "Walltime exceeds 48 hrs, queue is set to %s.\n"% queue
-        else:
-            queue = all_queues[0]
-            #print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
         self._params['queue'] = queue
 
     def _validate_queue_titan(self, queue, time):
@@ -352,7 +353,9 @@ class ConfParser:
             msg = "Queue error, exit."
             pbs_conf.setting_error(msg)
         # ignore if queue is high
-        if queue != 'high':
+        elif queue.lower() == 'high':
+            pass
+        elif queue.lower() == 'debug' or queue.lower() == 'auto':
             if time[0]*60+time[1] <= 30:
                 queue = all_queues[0]
                 #print "Walltime is under 30 mins, queue is set to %s.\n"% queue
