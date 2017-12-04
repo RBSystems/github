@@ -326,6 +326,9 @@ class ConfParser:
 
     def _validate_queue_cades(self, queue, time):
         all_queues = ['batch', 'long']
+        if (queue.lower() != 'auto') and (queue not in all_queues):
+            msg = "Queue error, exit."
+            self.setting_error(msg)
         # only difference is that debug will run jobs in sub directories
         if queue.lower() == 'debug' or queue.lower() == 'auto':
             if time[0] > 48:
@@ -334,9 +337,6 @@ class ConfParser:
             else:
                 queue = all_queues[0]
                 #print "Walltime is under 48 hrs, queue is set to %s.\n"% queue
-        elif queue != 'none' and queue not in all_queues:
-            msg = "Queue error, exit."
-            self.setting_error(msg)
         self._params['queue'] = queue
 
     def _validate_queue_titan(self, queue, time):
@@ -349,11 +349,11 @@ class ConfParser:
 
     def _validate_queue_bw(self, queue, time):
         all_queues = ['debug', 'normal', 'high']
-        if queue != 'none' and queue not in all_queues:
+        if queue != 'auto' and queue not in all_queues:
             msg = "Queue error, exit."
             pbs_conf.setting_error(msg)
         # ignore if queue is high
-        elif queue.lower() == 'high':
+        if queue.lower() == 'high':
             pass
         elif queue.lower() == 'debug' or queue.lower() == 'auto':
             if time[0]*60+time[1] <= 30:
