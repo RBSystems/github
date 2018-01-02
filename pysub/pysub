@@ -360,8 +360,9 @@ if __name__ == "__main__":
         others_blocked = checkOthers()
         while others_blocked:
             time_tmp = time.strftime(time_format, time.localtime())
-            sleep_msg = ("%s@%s: There are others' jobs blocked. Sleeping for [%4d] secs..."
+            sleep_msg = ("%s@%s: There are jobs blocked owned by others. Sleeping for [%4d] secs..."
                             %(time_tmp, this_dir, pbs_conf['sleep']))
+            print sleep_msg
             os.system("echo %s >> %s"%(sleep_msg, file_log))
             time.sleep(pbs_conf['sleep']) 
             others_blocked = checkOthers()
