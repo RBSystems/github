@@ -9,6 +9,22 @@ import numpy as np
 
 from atoms import Atoms
 
+# read conf file
+def read_conf(conf_file):
+    with open(conf_file, 'rb') as f:
+        conf_lines = f.readlines()
+    for line in conf_lines:
+        line = line.split('#')[0]
+        if "structure_file" in line.lower():
+            value = line.split('=')[-1].strip()
+            symana_conf['structure_file'] = str(value)
+        elif "file_format" in line.lower():
+            value = line.split('=')[-1].strip()
+            symana_conf['file_format'] = str(value)
+        elif "kpt_mesh" in line.lower():
+            value = line.split('=')[-1].split()#[-1:-4:-1]
+            symana_conf['kpt_mesh'] = map(int, value)
+
 def show_symmetry(symmetry):
     for i in range(symmetry['rotations'].shape[0]):
         print("  --------------- %4d ---------------" % (i + 1))
@@ -31,26 +47,44 @@ def show_cell(lattice, positions, numbers):
     for p, s in zip(positions, numbers):
         print("%2d %10.5f %10.5f %10.5f" % ((s,) + tuple(p)))
 
+if __name__ == "__main__":
 
-structure_file = "SrTiO3.cif"
+    symana_conf = {"structure_file": None,
+                   "file_format": None,
+                   "kpt_mesh": [1, 1, 1]
+                  }
 
-structure = ase.io.read(structure_file, format="cif")
+    # read control file
+    if len(sys.argv) > 1:
+        print "Use user defined symana control file: %s\n"% sys.argv[-1]
+        symana_conf_file = sys.argv[-1]
+        read_conf(symana_conf_file)
+    else:
+        if os.path.isfile('symana.conf'):
+            print "Use default symana control file in current working directory: %s\n"% 'symana.conf'
+            symana_conf_file = "symana.conf"
+            read_conf(symana_conf_file)
+        else:
+            print "Use program internal symana parameters\n"
 
-print("[get_spacegroup]")
-print("  Spacegroup of Silicon (ASE Atoms-like format) is %s." %
+
+    structure = ase.io.read(symana_conf['structure_file'], format=symana_conf['file_format'])
+
+    print("[get_spacegroup]")
+    print("  Spacegroup of Silicon (ASE Atoms-like format) is %s." %
       spglib.get_spacegroup(structure))
-print('')
+    print('')
 
-mapping, grid = spglib.get_ir_reciprocal_mesh([9, 9, 9],
+    mapping, grid = spglib.get_ir_reciprocal_mesh(symana_conf['kpt_mesh'],
                                               structure,
                                               is_shift=[0, 0, 0])
-num_ir_kpt = len(np.unique(mapping))
-print("[get_ir_reciprocal_mesh]")
-print("  Number of irreducible k-points of SrTiO3 with")
-print("  9x9x9 Monkhorst-Pack mesh is %d (35)." % num_ir_kpt)
-print('')
+    num_ir_kpt = len(np.unique(mapping))
+    print("[get_ir_reciprocal_mesh]")
+    print("  Number of irreducible k-points of SrTiO3 with")
+    print("  %dx%dx%d Monkhorst-Pack mesh is %d." % tuple(symana_conf['kpt_mesh'] + [num_ir_kpt]))
+    print('')
 
-exit()
+    exit()
 
 silicon_ase = Atoms(symbols=['Si'] * 8,
                     cell=[(4, 0, 0),

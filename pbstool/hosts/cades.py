@@ -20,6 +20,7 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "%(module)s"% pbs_dict
     lines_pbs += "module list\n"
     lines_pbs += "\n"
+    #lines_pbs += "ulimit -s unlimited\n"
     lines_pbs += "export OMP_NUM_THREADS=%(threads)d\n"% pbs_dict
     lines_pbs += "\n"
     lines_pbs += "cd %(pwd)s\n"% pbs_dict
