@@ -18,7 +18,9 @@ from subprocess import Popen, PIPE
 # check if qsub.EXIT exists
 def checkExit(exitfile="qsub.EXIT"):
     if os.path.isfile(exitfile) or os.path.isfile(os.path.join(pwd, exitfile)):
-        print 'Exit file found, aborting....\n'
+        msg = 'Exit file found, aborting....\n'
+        print msg
+        #os.system('echo %s >> %s'%(msg, ))
         sys.exit(0)
 
 
@@ -30,18 +32,37 @@ def checkOthers(acct='sns'):
     others_oe = ''.join(others_oe_tmp).split('\n')
     #print others_oe[0:10]
     for i in range(len(others_oe)):
-        if ' eligible jobs' in others_oe[i] and int(others_oe[i].split()[0]) != 0:
+        if ' eligible job' in others_oe[i] and int(others_oe[i].split()[0]) != 0:
             for j in range(int(others_oe[i].split()[0])):
                 if str(others_oe[i-j-2].split()[1]) != 'z8j':
                     return True
 
 
-        if ' blocked jobs' in others_oe[i] and int(others_oe[i].split()[0]) != 0:
+        if ' blocked job' in others_oe[i] and int(others_oe[i].split()[0]) != 0:
             for j in range(int(others_oe[i].split()[0])):
-                if str(others_oe[i-j-2].split()[1]) != 'z8j':
+                if str(others_oe[i-j-2].split()[1]) != 'z8j' and str(others_oe[i-j-2].split()[2]) != "BatchHold":
                     return True
 
     return False
+
+# for the whole acct
+def get_qrh_procs(acct='sns'):
+    check_acct = Popen(['showq -w acct=%s'%acct], stdout=PIPE, stderr=PIPE, shell=True)
+    acct_out, acct_err = check_acct.communicate()
+    acct_oe_tmp = acct_out + acct_err
+    acct_oe = ''.join(acct_oe_tmp).split('\n')
+    nact, nelg, nblk = 0, 0, 0
+    for i in range(len(acct_oe)):
+        if ' active job' in acct_oe[i]:
+            nact = int(str(acct_oe[i]).split()[3])
+        elif ' eligible job' in acct_oe[i] and int(acct_oe[i].split()[0]) != 0:
+            for j in range(int(acct_oe[i].split()[0])):
+                nelg += int(acct_oe[i-j-2].split()[3])
+        elif ' blocked job' in acct_oe[i] and int(acct_oe[i].split()[0]) != 0:
+            nblk = 0
+            for j in range(int(acct_oe[i].split()[0])):
+                nblk += int(acct_oe[i-j-2].split()[3])
+    return nact+nelg+nblk
 
 # read conf file
 def read_conf(conf_file):
@@ -55,6 +76,14 @@ def read_conf(conf_file):
         elif "max_nodes" in line.lower():
             values = line.split('=')[-1]
             pbs_conf['max_nodes'] = int(values)
+        elif "max_procs" in line.lower():
+            values = line.split('=')[-1]
+            #pbs_conf['max_acct_nodes'] = int(values)
+            pbs_conf['max_procs'] = int(values)
+        elif "max_acct_nodes" in line.lower():
+            values = line.split('=')[-1]
+            #pbs_conf['max_acct_nodes'] = int(values)
+            pbs_conf['max_acct_nodes'] = int(values)
         elif "max_jobs" in line.lower():
             values = line.split('=')[-1]
             pbs_conf['max_jobs'] = int(values)
@@ -92,7 +121,7 @@ def get_queued_nodes():
     return nodes_tmp
 
 # get total number of current jobs
-def get_qrh_nodes():
+def get_qrh_nodes_old():
 
     nodes_r, nodes_q, nodes_h = 0, 0, 0
     time_format='%Y%m%d%H%M%S'
@@ -297,6 +326,8 @@ if __name__ == "__main__":
                 "exclude": None,
                 "name_log": "log.pbs",
                 "max_nodes": -1,
+                "max_procs": -1,
+                "max_acct_nodes": -1,
                 "max_jobs": -1,
                 "ignore_if_existed": None,
                 "sleep": 0
@@ -378,23 +409,40 @@ if __name__ == "__main__":
             time.sleep(pbs_conf['sleep']) 
             others_blocked = checkOthers()
 
+        # decide which limitation case
+        limit_case = 0 # no limit
+        
+        if pbs_conf['max_acct_nodes'] > 0 and pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] < 0:
+            limit_case = 1
+        elif pbs_conf['max_acct_nodes'] < 0 and pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] <0:
+            limit_case = 2
+        elif pbs_conf['max_acct_nodes'] < 0 and pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] >0:
+            limit_case = 3
+        elif pbs_conf['max_acct_nodes'] > 0 and pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] <0:
+            limit_case = 4
+        elif pbs_conf['max_acct_nodes'] > 0 and pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] >0:
+            limit_case = 5
+        elif pbs_conf['max_acct_nodes'] < 0 and pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] >0:
+            limit_case = 6
+        elif pbs_conf['max_acct_nodes'] > 0 and pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] >0:
+            limit_case = 7
         # no limits at all
-        if pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] < 0:
+        if pbs_conf['max_procs'] < 0 and pbs_conf['max_jobs'] < 0:
             os.system('qsub %s'%( pbs_conf['file_pbs']))
         # limit max_nodes
-        elif pbs_conf['max_nodes'] > 0 and pbs_conf['max_jobs'] < 0:
+        elif pbs_conf['max_procs'] > 0 and pbs_conf['max_jobs'] < 0:
             #queued_nodes = get_queued_nodes()
             #running_nodes = get_running_nodes()
-            qrh_nodes = get_qrh_nodes()
-            while qrh_nodes > pbs_conf['max_nodes']:
+            qrh_procs = get_qrh_procs()
+            while qrh_procs > pbs_conf['max_procs']:
                 time_tmp = time.strftime(time_format, time.localtime())
-                sleep_msg = ('%s@%s: %d nodes in use out of max limit %d. Sleeping for [%4d] secs...'
-                            %(time_tmp, this_dir, qrh_nodes, pbs_conf['max_nodes'], pbs_conf['sleep']))
+                sleep_msg = ('%s@%s: %d procs in use out of max limit %d. Sleeping for [%4d] secs...'
+                            %(time_tmp, this_dir, qrh_procs, pbs_conf['max_procs'], pbs_conf['sleep']))
                 print sleep_msg
                 os.system("echo %s >> %s"%(sleep_msg, file_log))
                 time.sleep(pbs_conf['sleep'])
 
-                qrh_nodes = get_qrh_nodes()
+                qrh_procs = get_qrh_procs()
                 #queued_nodes = get_queued_nodes()
                 #running_nodes = get_running_nodes()
 
@@ -404,7 +452,7 @@ if __name__ == "__main__":
             # submitted jobs info delay
             time.sleep(30)
         # limit max jobs
-        elif pbs_conf['max_nodes'] < 0 and pbs_conf['max_jobs'] > 0:
+        elif pbs_conf['max_procs'] < 0 and pbs_conf['max_jobs'] > 0:
             num_jobs = get_num_jobs()
             while num_jobs > pbs_conf['max_jobs']:
                 time_tmp = time.strftime(time_format, time.localtime())

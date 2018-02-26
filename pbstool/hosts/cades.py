@@ -40,6 +40,10 @@ def get_pbs_lines(pbs_dict):
         lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s\n"% pbs_dict
     lines_pbs += "\n"
     lines_pbs += "date\n"
+    lines_pbs += '\n'
+    lines_pbs += "if [ ! `grep WARNING oe.$PBS_JOBID OUTCAR` = '' ]; then\n"
+    lines_pbs += "  grep WARNING oe.$PBS_JOBID OUTCAR >> WARNING\n"
+    lines_pbs += "fi\n"
 
     return lines_pbs
 
