@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#PBS -A baec
+#PBS -q normal
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l walltime=100:30:00
+#PBS -l nodes=1:ppn=32:xe
+#PBS -W depend=afterany:8465690
+#PBS -N pbstool.debug@/mnt/a/u/sciteam/zhang7/github/pbstool/tests/debug/2018-04-30-14-02-31
+
+source /opt/modules/default/init/bash
+module swap PrgEnv-cray PrgEnv-gnu
+module list
+
+export OMP_NUM_THREADS=1
+
+export MPICH_MAX_THREAD_SAFETY=serialized
+export OMP_WAIT_POLICY=passive
+export MPICH_ENV_DISPLAY=1
+export MPICH_ALLREDUCE_NO_SMP=1
+ulimit -a
+export CRAY_CUDA_PROXY=1
+export MPICH_UNEX_BUFFER_SIZE=362914560
+export MPICH_MAX_SHORT_MSG_SIZE=3200
+
+cd /mnt/a/u/sciteam/zhang7/github/pbstool/tests/debug/2018-04-30-14-02-31
+
+date
+
+aprun -n 32 -N 32 -d 1 -cc numa_node /u/sciteam/zhang7/bin/rmg-cpu rmg.in > rmg.00.out
+wait
+
+date
