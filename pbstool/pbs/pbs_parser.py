@@ -329,7 +329,7 @@ class ConfParser:
             self.setting_error(msg)
 
     def _validate_queue_cades(self, queue, time):
-        all_queues = ['batch', 'long']
+        all_queues = ['std', 'long']
         if (queue.lower() != 'auto') and (queue not in all_queues):
             msg = "Queue error, exit."
             self.setting_error(msg)
