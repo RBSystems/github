@@ -12,6 +12,9 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "#PBS -o oe.$PBS_JOBID\n"
     lines_pbs += "#PBS -l walltime=%(time)s\n"% pbs_dict
     lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32:xe\n"% pbs_dict
+    if pbs_dict['depend'][0]:
+        lines_pbs += "#PBS -W depend=%s:%d\n"% (pbs_dict['depend'][0], pbs_dict['depend'][1][0])
+        #lines_pbs += "#PBS -W depend=%s:%d\n"% tuple(pbs_dict['depend'])
     lines_pbs += "#PBS -N %(name)s\n"% pbs_dict
     lines_pbs += "\n"
     lines_pbs += "source /opt/modules/default/init/bash\n"
@@ -43,6 +46,8 @@ def get_pbs_lines(pbs_dict):
         lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s < %(exeinput)s > %(exeoutput)s\n"% pbs_dict
     elif exename == 'VASP':
         lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s\n"% pbs_dict
+    elif exename.lower() == 'others':
+        lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s -i %(exeinput)s -o %(exeoutput)s\n"% pbs_dict
     lines_pbs += "wait\n"
     lines_pbs += "\n"
     lines_pbs += "date\n"

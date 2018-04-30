@@ -10,10 +10,11 @@ class ConfParser:
                         'time':     param_prop['time']['default'],
                         'exeinput': param_prop['exeinput']['default'],
                         'exepath':  param_prop['exepath']['default'],
-                        'ignore_error':  param_prop['ignore_error']['default'],
                         'account':  param_prop['account']['default'],
                         'module':   param_prop['module']['default']
         }
+                        #'force_sub':  param_prop['force_sub']['default'],
+                        #'depend':  param_prop['depend']['default'],
 
         self._params = {}
         self._workdir=""
@@ -59,8 +60,9 @@ class ConfParser:
                 self.set_param('time', confs['time'])
             elif conf_key == 'exeinput':
                 self.set_param('exeinput', confs['exeinput'])
-            elif conf_key == 'exepath': # to avoid unrecognized tag error
+            elif conf_key == 'exepath': # avoid unrecognized tag error
                 pass
+            #    self.set_param('exepath', conf['exepath'])
             elif conf_key == 'threads':
                 self.set_param('threads', confs['threads'])
             elif conf_key == 'name':
@@ -71,6 +73,10 @@ class ConfParser:
                 self.set_param('queue', confs['queue'])
             elif conf_key == 'exeoutput':
                 self.set_param('exeoutput', confs['exeoutput'])
+            elif conf_key == 'force_sub':
+                self.set_param('force_sub', confs['force_sub'])
+            elif conf_key == 'depend':
+                self.set_param('depend', confs['depend'])
             elif conf_key == 'account':
                 self.set_param('account', confs['account'])
             elif conf_key == 'module':
@@ -109,12 +115,33 @@ class ConfParser:
             self._set_module(val) 
         elif key == 'account':
             self._set_account(val) 
-        elif key == 'ignore_error':
-            pass
+        elif key == 'force_sub':
+            self._set_force_sub(val) 
+        elif key == 'depend':
+            self._set_depend(val) 
             #self._set_account(val) 
         else:
             msg = "Error: %s type tag could not be identified."% key.upper()
             self.setting_error(msg)
+
+#    def _set_nodes(self, val):
+#        self._params['nodes'] = int(val)
+#
+#    def _set_time(self, val):
+#        self._params['time'] = [int(ele) for ele in val.split()]
+#
+#    def _set_exeinput(self, val):
+#        self._params['exeinput'] = val
+#
+#    def _set_exeoutput(self, val):
+#        self._params['exeoutput'] = str(val)
+#
+#    def _set_exepath(self, val):
+#            pass
+#            #self._set_account(val) 
+#        else:
+#            msg = "Error: %s type tag could not be identified."% key.upper()
+#            self.setting_error(msg)
 
     def _set_nodes(self, val):
         self._params['nodes'] = int(val)
@@ -122,8 +149,28 @@ class ConfParser:
     def _set_time(self, val):
         self._params['time'] = [int(ele) for ele in val.split()]
 
+    def _set_depend(self, val):
+        if type(val) == list:
+            self._params['depend'] = val
+        else:
+            dep_crit = val.split(':')[0]
+            dep_jobs = val.split(':')[1].split(',')
+            depend = [dep_crit, [int(ele) for ele in dep_jobs]]
+            self._params['depend'] = depend
+
     def _set_exeinput(self, val):
         self._params['exeinput'] = val
+
+    def _set_force_sub(self, val):
+        if type(val) == bool:
+            self._params['force_sub'] = val
+        elif val.lower() in ['false', 'f']:
+            self._params['force_sub'] = False
+        elif val.lower() in ['true', 't']:
+            self._params['force_sub'] = True
+        else:
+            msg = "Error: Unknown value for tag FORCE_SUB, exit."
+            self.setting_error(msg)
 
     def _set_exeoutput(self, val):
         self._params['exeoutput'] = str(val)
@@ -221,6 +268,9 @@ class ConfParser:
                 self.setting_error(msg)
 
     def validate_exepath(self):
+        # skip if force submit
+        #if self._params['force_sub']:
+        #    return
         rmg_exe_list = ['rmg-cpu', 'rmg-cpu-MulKpt']
         qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x', 'lambda.x', 'epw.x', 'd3q.x', 'd3_q2r.x', 'd3_qq2rr.x', 'd3_asr3.x', 'd3_sparse.x', 'd3_lw.x', 'd3_tk.x']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
@@ -240,6 +290,8 @@ class ConfParser:
             self._params['exename'] = 'VASP'
         elif exename in castep_exe_list:
             self._params['exename'] = 'CASTEP'
+        elif self._params['force_sub']:
+            self._params['exename'] = 'others'
         else:
             msg = "Error: unknown exe, exit."
             self.setting_error(msg)
@@ -328,6 +380,15 @@ class ConfParser:
             msg = "Unknown host: %s, exit"% host
             self.setting_error(msg)
 
+    def validate_depend(self, job_ids):
+        dep_crit, dep_jobs = self._params['depend']
+        if dep_crit in ['after', 'afterok', 'afterany', 'afternotok', 'before', 'beforeany', 'beforeok', 'beforenotok', 'on', 'synccount', 'syncwith']:
+            msg = "Unrecognized dependency: %s, exit"% dep_crit
+            self.setting_error(msg)
+        # check if those jobs belongs to myself
+        for job in dep_jobs:
+            pass
+
     def _validate_queue_cades(self, queue, time):
         all_queues = ['std', 'long']
         if (queue.lower() != 'auto') and (queue not in all_queues):
@@ -381,6 +442,7 @@ def write_pbs(init_env, pbs_conf):
     exename  = pbs_conf._params['exename']
     cores    = pbs_conf._params['cores']
     module   = pbs_conf._params['module']
+    depend = pbs_conf._params['depend']
 
     # convert to pbs format
     pwd         = os.path.join(init_env.get_pwd(), pbs_conf._workdir)
@@ -407,6 +469,7 @@ def write_pbs(init_env, pbs_conf):
                 'exeinput':     exeinput,
                 'module':       module_pbs,
                 'exeoutput':    exeoutput,
+                'depend':       depend,
                 'ppn_use':      ppn_use}
 
     if init_env.get_host() == "Cades":

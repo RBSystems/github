@@ -26,10 +26,12 @@ USAGE:
     NAME        = surface-pbe221-rlx
     IS_SUBMIT   = true
     QUEUE       = auto
-    IGNORE_ERROR= false
+    FORCE_SUB   = false
     EXEOUTPUT   = none
     MODULE      = PrgEnv-gnu
     MODULE      = fftw
+    DEPEND      = afterok:1234567
+    
     ------------------------------------------------------------------------
     If $pbs.conf is not specified, pbs.conf will be read by default.
 
