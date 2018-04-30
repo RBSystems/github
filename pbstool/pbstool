@@ -24,7 +24,8 @@ USAGE:
     # optional
     NAME        = surface-pbe221-rlx
     IS_SUBMIT   = true
-    QUEUE       = None
+    QUEUE       = auto
+    IGNORE_ERROR= false
     EXEOUTPUT   = none
     MODULE      = PrgEnv-gnu
     MODULE      = fftw

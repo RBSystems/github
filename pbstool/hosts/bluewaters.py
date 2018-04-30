@@ -23,7 +23,7 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "\n"
     lines_pbs += "export OMP_NUM_THREADS=%(threads)d\n"% pbs_dict
     lines_pbs += "\n"
-    if exename == "aaaaRMG":
+    if exename == "RMG":
         lines_pbs += "export MPICH_MAX_THREAD_SAFETY=serialized\n"
         lines_pbs += "export OMP_WAIT_POLICY=passive\n"
         lines_pbs += "export MPICH_ENV_DISPLAY=1\n"

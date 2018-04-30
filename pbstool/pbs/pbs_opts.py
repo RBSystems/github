@@ -10,6 +10,7 @@ param_prop = {
     'name':      {'required': False, 'type': 'str',   'default': 'test'},
     'queue':     {'required': False, 'type': 'str',   'default': 'debug'},
     'is_submit': {'required': False, 'type': 'bool',  'default': True},
+    'ignore_error': {'required': False, 'type': 'bool',  'default': False},
     'cores':     {'required': False, 'type': 'int',   'default': None},
     'exeoutput': {'required': False, 'type': 'str',   'default': None},
     'module':    {'required': False, 'type': 'str',   'default': []}

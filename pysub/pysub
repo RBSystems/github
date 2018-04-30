@@ -275,6 +275,7 @@ if __name__ == "__main__":
                         excluded = True
 
         if excluded:
+            print "No job need to run.\n"
             continue
 
         # no limits at all

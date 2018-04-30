@@ -10,6 +10,7 @@ class ConfParser:
                         'time':     param_prop['time']['default'],
                         'exeinput': param_prop['exeinput']['default'],
                         'exepath':  param_prop['exepath']['default'],
+                        'ignore_error':  param_prop['ignore_error']['default'],
                         'account':  param_prop['account']['default'],
                         'module':   param_prop['module']['default']
         }
@@ -108,6 +109,9 @@ class ConfParser:
             self._set_module(val) 
         elif key == 'account':
             self._set_account(val) 
+        elif key == 'ignore_error':
+            pass
+            #self._set_account(val) 
         else:
             msg = "Error: %s type tag could not be identified."% key.upper()
             self.setting_error(msg)
@@ -217,7 +221,7 @@ class ConfParser:
                 self.setting_error(msg)
 
     def validate_exepath(self):
-        rmg_exe_list = ['rmg-cpu']
+        rmg_exe_list = ['rmg-cpu', 'rmg-cpu-MulKpt']
         qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x', 'lambda.x', 'epw.x', 'd3q.x', 'd3_q2r.x', 'd3_qq2rr.x', 'd3_asr3.x', 'd3_sparse.x', 'd3_lw.x', 'd3_tk.x']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
         castep_exe_list = ['castep.mpi']
