@@ -14,5 +14,6 @@ param_prop = {
     'cores':     {'required': False, 'type': 'int',   'default': None},
     'exeoutput': {'required': False, 'type': 'str',   'default': None},
     'depend':    {'required': False, 'type': ['str', 'list'], 'default': [None, []]},
+    'link_disk': {'required': False, 'type': ['str', 'str', 'str'], 'default': [None, None, None]},
     'module':    {'required': False, 'type': 'str',   'default': []}
     }

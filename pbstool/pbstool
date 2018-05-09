@@ -102,15 +102,17 @@ class InitEnv:
 # check if settings make sense, and correct them
 def validate_params(pbs_conf, init_env):
 
+    no_default_key_list = ['link_disk']
     # if not set in pbs.conf, then use its default value defined
     for key in param_prop:
-        if not key in pbs_conf._params:
+        if not key in pbs_conf._params and not key in no_default_key_list:
             pbs_conf.set_param(key, param_prop[key]['default'])
 
     # DO NOT change orders of following lines
     # BEWARE: exepath must be in front of exeinput
     #       queue be in front of name
     #       output before queue
+    #       link_disk after exename
     pbs_conf.validate_exepath()
     pbs_conf.validate_exeoutput()
     pbs_conf.validate_queue(init_env.get_host())
@@ -121,6 +123,10 @@ def validate_params(pbs_conf, init_env):
     pbs_conf.validate_account(init_env.get_host())
     pbs_conf.validate_exeinput()
     pbs_conf.validate_module()
+    if 'depend' in pbs_conf._params:
+        pbs_conf.validate_depend()
+    if 'link_disk' in pbs_conf._params:
+        pbs_conf.validate_link_disk(init_env.get_pwd())
 
     # create sub directories
     if pbs_conf._workdir != '':
@@ -219,6 +225,9 @@ if __name__ == "__main__":
     # validate pbs control args and other args
     validate_params(pbs_conf, init_env)
     #print pbs_conf._params
+
+    # link mirrors at another disk, like scratch on supercomputer
+    
 
     # write pbs batch scripts
     write_pbs(init_env, pbs_conf)

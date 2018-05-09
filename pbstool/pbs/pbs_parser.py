@@ -77,6 +77,8 @@ class ConfParser:
                 self.set_param('force_sub', confs['force_sub'])
             elif conf_key == 'depend':
                 self.set_param('depend', confs['depend'])
+            elif conf_key == 'link_disk':
+                self.set_param('link_disk', confs['link_disk'])
             elif conf_key == 'account':
                 self.set_param('account', confs['account'])
             elif conf_key == 'module':
@@ -119,6 +121,8 @@ class ConfParser:
             self._set_force_sub(val) 
         elif key == 'depend':
             self._set_depend(val) 
+        elif key == 'link_disk':
+            self._set_link_disk(val) 
             #self._set_account(val) 
         else:
             msg = "Error: %s type tag could not be identified."% key.upper()
@@ -157,6 +161,12 @@ class ConfParser:
             dep_jobs = val.split(':')[1].split(',')
             depend = [dep_crit, [int(ele) for ele in dep_jobs]]
             self._params['depend'] = depend
+
+    def _set_link_disk(self, val):
+        if type(val) == list:
+            self._params['link_disk'] = val
+        else:
+            self._params['link_disk'] = [ele for ele in val.split()]
 
     def _set_exeinput(self, val):
         self._params['exeinput'] = val
@@ -380,14 +390,31 @@ class ConfParser:
             msg = "Unknown host: %s, exit"% host
             self.setting_error(msg)
 
-    def validate_depend(self, job_ids):
+    def validate_depend(self):
         dep_crit, dep_jobs = self._params['depend']
-        if dep_crit in ['after', 'afterok', 'afterany', 'afternotok', 'before', 'beforeany', 'beforeok', 'beforenotok', 'on', 'synccount', 'syncwith']:
+        if dep_crit not in [None, 'after', 'afterok', 'afterany', 'afternotok', 'before', 'beforeany', 'beforeok', 'beforenotok', 'on', 'synccount', 'syncwith']:
             msg = "Unrecognized dependency: %s, exit"% dep_crit
             self.setting_error(msg)
         # check if those jobs belongs to myself
-        for job in dep_jobs:
-            pass
+        #for job in dep_jobs:
+        #    pass
+
+    def validate_link_disk(self, pwd):
+        scratch, work_dir, target = self._params['link_disk']
+        scratch_exclude = "/mnt/c/scratch/sciteam/zhang7/run"
+        work_dir_exclude = "/mnt/a/u/sciteam/zhang7/work/"
+        if work_dir.lower() == 'pwd':
+            work_dir = pwd
+        abs_target_link = os.path.join(work_dir, target)
+        rel_work_path = os.path.relpath(work_dir, work_dir_exclude)
+        abs_scratch_path = os.path.join(scratch_exclude, rel_work_path)
+        abs_target_source = os.path.join(abs_scratch_path, target)
+        if not os.path.isdir(abs_target_source):
+            print "Target scratch dir %s does not exist, will create a new one.\n"% abs_target_source
+            os.mkdir(abs_target_source)
+        if not os.path.islink(abs_target_link):
+            print "Target link %s does not exist, will create a new one.\n"% abs_target_link
+            os.symlink(abs_target_source, abs_target_link)
 
     def _validate_queue_cades(self, queue, time):
         all_queues = ['std', 'long']
@@ -442,7 +469,7 @@ def write_pbs(init_env, pbs_conf):
     exename  = pbs_conf._params['exename']
     cores    = pbs_conf._params['cores']
     module   = pbs_conf._params['module']
-    depend = pbs_conf._params['depend']
+    depend   = pbs_conf._params['depend']
 
     # convert to pbs format
     pwd         = os.path.join(init_env.get_pwd(), pbs_conf._workdir)
