@@ -31,6 +31,8 @@ USAGE:
     MODULE      = PrgEnv-gnu
     MODULE      = fftw
     DEPEND      = afterok:1234567
+    LINK_DISK   = /mnt/c/scratch/sciteam/zhang7/run pwd Waves
+
     
     ------------------------------------------------------------------------
     If $pbs.conf is not specified, pbs.conf will be read by default.
