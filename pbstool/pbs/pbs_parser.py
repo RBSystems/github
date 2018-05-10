@@ -411,7 +411,7 @@ class ConfParser:
         abs_target_source = os.path.join(abs_scratch_path, target)
         if not os.path.isdir(abs_target_source):
             print "Target scratch dir %s does not exist, will create a new one.\n"% abs_target_source
-            os.mkdir(abs_target_source)
+            os.makedirs(abs_target_source)
         if not os.path.islink(abs_target_link):
             print "Target link %s does not exist, will create a new one.\n"% abs_target_link
             os.symlink(abs_target_source, abs_target_link)

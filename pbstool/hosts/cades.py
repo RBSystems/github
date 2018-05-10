@@ -29,10 +29,18 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "\n"
     if exename == 'RMG':
         lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s > %(exeoutput)s\n"% pbs_dict
+        lines_pbs += "if [ ! `grep TIMING oe.$PBS_JOBID *log` = '' ]; then\n"
+        lines_pbs += "  exit -1\n"
+        lines_pbs += "fi\n"
     elif exename == 'QE':
         lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s < %(exeinput)s > %(exeoutput)s\n"% pbs_dict
     elif exename == 'VASP':
         lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s\n"% pbs_dict
+        lines_pbs += '\n'
+        lines_pbs += "if [ ! `grep WARNING oe.$PBS_JOBID OUTCAR` = '' ]; then\n"
+        lines_pbs += "  grep WARNING oe.$PBS_JOBID OUTCAR >> WARNING\n"
+        lines_pbs += "  exit 2013\n"
+        lines_pbs += "fi\n"
     elif exename == 'CASTEP':
         lines_pbs += "PSPOT_DIR=/software/user_tools/current/cades-virtues/apps/castep/pseudopotentials\n"
         lines_pbs += "export PSPOT_DIR\n"
@@ -41,9 +49,6 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "\n"
     lines_pbs += "date\n"
     lines_pbs += '\n'
-    lines_pbs += "if [ ! `grep WARNING oe.$PBS_JOBID OUTCAR` = '' ]; then\n"
-    lines_pbs += "  grep WARNING oe.$PBS_JOBID OUTCAR >> WARNING\n"
-    lines_pbs += "fi\n"
 
     return lines_pbs
 
