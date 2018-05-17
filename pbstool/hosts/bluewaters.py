@@ -42,6 +42,10 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "\n"
     if exename == "RMG":
         lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s %(exeinput)s > %(exeoutput)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "if [ -f core ]; then\n"
+        lines_pbs += "  rm core\n"
+        lines_pbs += "fi\n"
         lines_pbs += "if [ ! `grep TIMING oe.$PBS_JOBID *log` = '' ]; then\n"
         lines_pbs += "  exit -1\n"
         lines_pbs += "fi\n"
