@@ -282,7 +282,7 @@ class ConfParser:
         #if self._params['force_sub']:
         #    return
         rmg_exe_list = ['rmg-cpu', 'rmg-cpu-MulKpt']
-        qe_exe_list = ['pw.x', 'ph.x', 'q2r.x', 'matdyn.x', 'lambda.x', 'epw.x', 'd3q.x', 'd3_q2r.x', 'd3_qq2rr.x', 'd3_asr3.x', 'd3_sparse.x', 'd3_lw.x', 'd3_tk.x']
+        qe_exe_list = ['pw.x', 'ph.x', 'cp.x', 'q2r.x', 'matdyn.x', 'lambda.x', 'epw.x', 'd3q.x', 'd3_q2r.x', 'd3_qq2rr.x', 'd3_asr3.x', 'd3_sparse.x', 'd3_lw.x', 'd3_tk.x']
         vasp_exe_list = ['vasp_std', 'vasp_ncl', 'vasp_gam']
         castep_exe_list = ['castep.mpi']
         exepath  = self._params['exepath']
@@ -440,10 +440,10 @@ class ConfParser:
         self._params['queue'] = queue
 
     def _validate_queue_bw(self, queue, time):
-        all_queues = ['debug', 'normal', 'high']
+        all_queues = ['debug', 'normal', 'high', 'low']
         if queue != 'auto' and queue not in all_queues:
             msg = "Queue error, exit."
-            pbs_conf.setting_error(msg)
+            self.setting_error(msg)
         # ignore if queue is high
         if queue.lower() == 'high':
             pass
