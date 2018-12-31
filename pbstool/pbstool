@@ -83,7 +83,7 @@ class InitEnv:
             self._host = 'Titan'
         else:
             self._host = hostname
-            print 'Warning: Unknown host.'
+            print('Warning: Unknown host.')
 
     def get_host(self):
         return self._host
@@ -181,7 +181,7 @@ def PBSRun(init_env, pbs_conf):
         os.system('cp %s %s'%(pbs_conf._params['exeinput'], full_workdir))
 
     if pbs_conf._params['is_submit']:
-        print "Submitting jobs..."
+        print("Submitting jobs...")
         os.chdir(full_workdir)
         os.system('qsub pbs.%s'% pbs_conf._params['exename'].lower())
         os.chdir(init_env.get_pwd())
@@ -195,15 +195,15 @@ def PBSRun(init_env, pbs_conf):
             f.write(lines_conf)
 
     # echo pbs conf to screen
-    print "\nPBS configurations:"
-    print "-"*60
-    print "%s"% ''.join(lines_pbs)
-    print "-"*60
+    print("\nPBS configurations:")
+    print("-"*60)
+    print("%s"% ''.join(lines_pbs))
+    print("-"*60)
 
 
 if __name__ == "__main__":
 
-    print '\n'
+    print('\n')
 
     if len(sys.argv) > 1:
         filename = sys.argv[1]

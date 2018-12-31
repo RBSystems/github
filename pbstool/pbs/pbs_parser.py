@@ -236,7 +236,7 @@ class ConfParser:
         is_submit = self._params['is_submit']
         exename = self._params['exename']
         if not is_submit:
-            print "%s: Debug mode, job will not be submitted.\n"% exename.upper()
+            print("%s: Debug mode, job will not be submitted.\n"% exename.upper())
         
     def validate_threads(self, host):
         threads  = self._params['threads']
@@ -320,7 +320,7 @@ class ConfParser:
         #all_mods = os.popen('module avail').read()
         for _module in modules:
             if (not os.path.isfile(_module)) and ("%s"% _module not in _outerr):
-                print "Warning: module %s does not exist."% _module
+                print("Warning: module %s does not exist."% _module)
 
     def validate_exeinput(self):
         exeinput = self._params['exeinput']
@@ -410,10 +410,10 @@ class ConfParser:
         abs_scratch_path = os.path.join(scratch_exclude, rel_work_path)
         abs_target_source = os.path.join(abs_scratch_path, target)
         if not os.path.isdir(abs_target_source):
-            print "Target scratch dir %s does not exist, will create a new one.\n"% abs_target_source
+            print("Target scratch dir %s does not exist, will create a new one.\n"% abs_target_source)
             os.makedirs(abs_target_source)
         if not os.path.islink(abs_target_link):
-            print "Target link %s does not exist, will create a new one.\n"% abs_target_link
+            print("Target link %s does not exist, will create a new one.\n"% abs_target_link)
             os.symlink(abs_target_source, abs_target_link)
 
     def _validate_queue_cades(self, queue, time):

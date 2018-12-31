@@ -13,6 +13,8 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "#PBS -o oe.$PBS_JOBID\n"
     lines_pbs += "#PBS -l qos=%(queue)s\n"% pbs_dict
     lines_pbs += "#PBS -W group_list=cades-virtues\n"
+    if pbs_dict['depend'][0]:
+        lines_pbs += "#PBS -W depend=%s:%d\n"% (pbs_dict['depend'][0], pbs_dict['depend'][1][0])
     lines_pbs += "#PBS -l walltime=%(time)s\n" % pbs_dict
     lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32\n"% pbs_dict
     lines_pbs += "#PBS -N %(name)s\n" % pbs_dict
@@ -29,6 +31,10 @@ def get_pbs_lines(pbs_dict):
     lines_pbs += "\n"
     if exename == 'RMG':
         lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s > %(exeoutput)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "if [ -f core ]; then\n"
+        lines_pbs += "  rm core\n"
+        lines_pbs += "fi\n"
         lines_pbs += "if [ ! `grep TIMING oe.$PBS_JOBID *log` = '' ]; then\n"
         lines_pbs += "  exit -1\n"
         lines_pbs += "fi\n"
