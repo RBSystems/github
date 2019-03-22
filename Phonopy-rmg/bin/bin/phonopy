@@ -1,0 +1,985 @@
+#!/usr/bin/python2
+
+# Modified by zjyx for RMG, at May/2016
+
+# Copyright (C) 2011 Atsushi Togo
+# All rights reserved.
+#
+# This file is part of phonopy.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# * Redistributions of source code must retain the above copyright
+#   notice, this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in
+#   the documentation and/or other materials provided with the
+#   distribution.
+#
+# * Neither the name of the phonopy project nor the names of its
+#   contributors may be used to endorse or promote products derived
+#   from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+import sys
+import os
+import numpy as np
+from phonopy import Phonopy, PhonopyGruneisen, PhonopyQHA, __version__
+import phonopy.file_IO as file_IO
+from phonopy.cui.settings import Settings, PhonopyConfParser
+from phonopy.cui.show_symmetry import check_symmetry
+from phonopy.cui.phonopy_argparse import get_parser
+from phonopy.units import (Wien2kToTHz, AbinitToTHz, PwscfToTHz, ElkToTHz,
+                           SiestaToTHz, VaspToTHz, RmgToTHz, Hartree, Bohr)
+from phonopy.structure.cells import print_cell, determinant
+from phonopy.structure.atoms import atom_data, symbol_map
+from phonopy.interface import create_FORCE_SETS, read_crystal_structure
+
+phonopy_version = __version__
+
+# AA is created at http://www.network-science.de/ascii/.
+def print_phononpy():
+    print("""        _                                    
+  _ __ | |__   ___  _ __   ___   _ __  _   _ 
+ | '_ \| '_ \ / _ \| '_ \ / _ \ | '_ \| | | |
+ | |_) | | | | (_) | | | | (_) || |_) | |_| |
+ | .__/|_| |_|\___/|_| |_|\___(_) .__/ \__, |
+ |_|                            |_|    |___/""")
+
+def print_version(version):
+    print(('%s' % version).rjust(44))
+    print('')
+
+def print_end():
+    print("""                 _ 
+   ___ _ __   __| |
+  / _ \ '_ \ / _` |
+ |  __/ | | | (_| |
+  \___|_| |_|\__,_|
+""")
+
+def print_error():
+    print("""  ___ _ __ _ __ ___  _ __ 
+ / _ \ '__| '__/ _ \| '__|
+|  __/ |  | | | (_) | |   
+ \___|_|  |_|  \___/|_|
+""")
+
+def print_attention(attention_text):
+    print("*" * 67)
+    print(attention_text)
+    print("*" * 67)
+    print('')
+
+def print_error_message(message):
+    print('')
+    print(message)
+
+def file_exists(filename, log_level):
+    if os.path.exists(filename):
+        return True
+    else:
+        error_text = "%s not found." % filename
+        print_error_message(error_text)
+        if log_level > 0:
+            print_error()
+        sys.exit(1)
+
+# get information about prim cell    
+def print_cells(phonon, unitcell_filename):
+    print("Crsytal structure is read from \'%s\'." % unitcell_filename)
+    supercell = phonon.get_supercell()
+    unitcell = phonon.get_unitcell()
+    primitive = phonon.get_primitive()
+    p2p_map = primitive.get_primitive_to_primitive_map()
+    mapping = np.array(
+        [p2p_map[x] for x in primitive.get_supercell_to_primitive_map()],
+        dtype='intc')
+    s_indep_atoms = phonon.get_symmetry().get_independent_atoms()
+    p_indep_atoms = mapping[s_indep_atoms]
+    if unitcell.get_number_of_atoms() == primitive.get_number_of_atoms():
+        print("-" * 32 + " unit cell " + "-" * 33)
+        print_cell(primitive, stars=p_indep_atoms)
+    else:
+        u2s_map = supercell.get_unitcell_to_supercell_map()
+        print("-" * 30 + " primitive cell " + "-" * 30)
+        print_cell(primitive, stars=p_indep_atoms)
+        print("-" * 32 + " unit cell " +  "-" * 33) # 32 + 11 + 33 = 76
+        u2u_map = supercell.get_unitcell_to_unitcell_map()
+        u_indep_atoms = [u2u_map[x] for x in s_indep_atoms]
+        print_cell(unitcell, mapping=mapping[u2s_map], stars=u_indep_atoms)
+    print("-" * 32 + " super cell " + "-" * 32)
+    print_cell(supercell, mapping=mapping, stars=s_indep_atoms)
+    print("-" * 76)
+
+def print_settings(settings):
+    print("Python version %d.%d.%d" % sys.version_info[:3])
+    import phonopy.structure.spglib as spglib
+    print("Spglib version %d.%d.%d" % spglib.get_version())
+
+    run_mode = settings.get_run_mode()
+    if run_mode == 'band':
+        print("Band structure mode")
+    if run_mode == 'mesh':
+        print("Mesh sampling mode")
+    if run_mode == 'band_mesh':
+        print("Band structure and mesh sampling mode")
+    if run_mode == 'anime':
+        print("Animation mode")
+    if run_mode == 'modulation':
+        print("Modulation mode")
+    if run_mode == 'irreps':
+        print("Ir-representation mode")
+    if run_mode == 'qpoints':
+        if settings.get_write_dynamical_matrices():
+            print("QPOINTS mode (dynamical matrices written out)")
+        else:
+            print("QPOINTS mode")
+    if (run_mode == 'band' or
+        run_mode == 'mesh' or
+        run_mode == 'qpoints') and settings.get_is_group_velocity():
+        gv_delta_q = settings.get_group_velocity_delta_q()
+        if gv_delta_q is not None:
+            print("  With group velocity calculation (dq=%3.1e)" % gv_delta_q)
+        else:
+            print('')
+    if run_mode == 'displacements':
+        print("Creating displacements")
+        if not settings.get_is_plusminus_displacement() == 'auto':
+            if settings.get_is_plusminus_displacement():
+                print("  Plus Minus displacement: full plus minus directions")
+            else:
+                print("  Plus Minus displacement: only one direction")
+        if not settings.get_is_diagonal_displacement():
+            print("  Diagonal displacement: off")
+
+    print("Settings:")
+    if settings.get_is_nac():
+        print("  Non-analytical term correction: on")
+    if settings.get_fc_spg_symmetry():
+        print("  Enforce space group symmetry to force constants: on")
+    if settings.get_fc_symmetry_iteration() > 0:
+        print("  Force constants symmetrization: %d times" %
+              settings.get_fc_symmetry_iteration())
+    if settings.get_lapack_solver():
+        print("  Use Lapack solver via Lapacke: on")
+    if run_mode == 'mesh' or run_mode == 'band_mesh':
+        print("  Sampling mesh: %s" % np.array(settings.get_mesh()[0]))
+
+    if (np.diag(np.diag(settings.get_supercell_matrix())) \
+            - settings.get_supercell_matrix()).any():
+        print("  Supercell matrix:")
+        for v in settings.get_supercell_matrix():
+            print("    %s" % v)
+    else:
+        print("  Supercell: %s" % np.diag(settings.get_supercell_matrix()))
+    if settings.get_primitive_matrix() is not None:
+        print("  Primitive axis:")
+        for v in settings.get_primitive_matrix():
+            print("    %s" % v)
+            
+###################
+# Command options #
+###################
+
+#really don't understand...
+parser = get_parser()
+(options, args) = parser.parse_args()
+option_list = parser.option_list
+
+# Set log level
+log_level = 1
+if options.verbose:
+    log_level = 2
+if options.quiet or options.is_check_symmetry:
+    log_level = 0
+if options.loglevel is not None:
+    log_level = options.loglevel
+
+#
+# Phonopy interface mode
+#
+# Physical units: energy,  distance,  atomic mass, force
+# vasp          : eV,      Angstrom,  AMU,         eV/Angstrom
+# wien2k        : Ry,      au(=borh), AMU,         mRy/au
+# abinit        : hartree, au,        AMU,         eV/Angstrom
+# elk           : hartree, au,        AMU,         hartree/au
+# pwscf         : Ry,      au,        AMU,         Ry/au
+# siesta        : eV,      au,        AMU,         eV/Angstroem
+# rmg           : Ha,      au,        AMU???,        Ha/au
+
+if options.wien2k_mode:
+    interface_mode = 'wien2k'
+    from phonopy.interface.wien2k import write_supercells_with_displacements
+    factor = Wien2kToTHz
+    nac_factor = 2000.0
+elif options.abinit_mode:
+    interface_mode = 'abinit'
+    from phonopy.interface.abinit import write_supercells_with_displacements
+    factor = AbinitToTHz
+    nac_factor = Hartree / Bohr
+elif options.pwscf_mode:
+    interface_mode = 'pwscf'
+    from phonopy.interface.pwscf import write_supercells_with_displacements
+    factor = PwscfToTHz
+    nac_factor = 2.0
+elif options.elk_mode:
+    interface_mode = 'elk'
+    from phonopy.interface.elk import write_supercells_with_displacements
+    factor = ElkToTHz
+    nac_factor = 1.0
+elif options.siesta_mode:
+    interface_mode = 'siesta'
+    from phonopy.interface.siesta import write_supercells_with_displacements
+    factor = SiestaToTHz
+    nac_factor = Hartree / Bohr
+elif options.rmg_mode:
+    interface_mode = 'rmg'
+    from phonopy.interface.rmg import write_supercells_with_displacements
+    from phonopy.interface.rmg import update_rmg_tags
+    factor = RmgToTHz
+    #what is nac factor?
+    nac_factor = Hartree/Bohr
+else:
+    interface_mode = 'vasp'
+    from phonopy.interface.vasp import write_supercells_with_displacements
+    from phonopy.interface.vasp import create_FORCE_CONSTANTS
+    factor = VaspToTHz
+    nac_factor = Hartree * Bohr
+
+# Show title
+if log_level > 0:
+    print_phononpy()
+    print_version(phonopy_version)
+
+# Create FORCE_SETS for VASP (-f or --force_sets)
+if options.force_sets_mode or options.force_sets_zero_mode:
+    file_exists('disp.yaml', log_level)
+    for filename in args:
+        file_exists(filename, log_level)
+    error_num = create_FORCE_SETS(interface_mode,
+                                  args,
+                                  options.symprec,
+                                  is_wien2k_p1=options.is_wien2k_p1,
+                                  log_level=log_level)
+    if log_level > 0:
+        print_end()
+    sys.exit(error_num)
+
+# Create FORCE_CONSTANTS (--fc or --force_constants)
+if options.force_constants_mode:
+    if len(args) > 0:
+        file_exists(args[0], log_level)
+        error_num = create_FORCE_CONSTANTS(args[0],
+                                           options,
+                                           log_level)
+    else:
+        print_error_message("Please specify vasprun.xml.")
+        error_num = 1
+        
+    if log_level > 0:
+        print_end()
+    sys.exit(error_num)
+    
+# Parse the setting file
+if len(args) > 0:
+    if file_exists(args[0], log_level):
+        phonopy_conf = PhonopyConfParser(filename=args[0],
+                                         options=options,
+                                         option_list=option_list)
+        settings = phonopy_conf.get_settings()
+else:
+    phonopy_conf = PhonopyConfParser(options=options,
+                                     option_list=option_list)
+    settings = phonopy_conf.get_settings()
+
+if options.is_graph_save:
+    import matplotlib
+    matplotlib.use('Agg')            
+
+##################
+# Initialization #
+##################
+unitcell, optional_structure_file_information = read_crystal_structure(
+    filename=settings.get_cell_filename(),
+    interface_mode=interface_mode,
+    chemical_symbols=settings.get_chemical_symbols(),
+    yaml_mode=settings.get_yaml_mode())
+
+## for rmg: only rmg will have 2 parameters here
+if options.rmg_mode:
+    tags = optional_structure_file_information[0]
+    unitcell_filename = optional_structure_file_information[1]
+    # need to change tags: grid and mesh
+    dim_lst = np.diag(settings.get_supercell_matrix()).tolist()
+    tags = update_rmg_tags(tags, dim_lst)
+else:
+    unitcell_filename = optional_structure_file_information[0]
+
+
+if unitcell is None:
+    print_error_message("Crystal structure file of %s could not be found." %
+                        unitcell_filename)
+    if log_level > 0:
+        print_error()
+    sys.exit(1)
+
+# Check unit cell
+if np.linalg.det(unitcell.get_cell()) < 0.0:
+    print_error_message("Determinant of the lattice vector matrix "
+                        "has to be positive.")
+    if log_level > 0:
+        print_end()
+    sys.exit(0)
+
+# Set magnetic moments
+magmoms = settings.get_magnetic_moments()
+if magmoms is not None:
+    if len(magmoms) == unitcell.get_number_of_atoms():
+        unitcell.set_magnetic_moments(magmoms)
+    else:
+        error_text = "Invalid MAGMOM setting"
+        print_error_message(error_text)
+        if log_level > 0:
+            print_end()
+        sys.exit(1)
+
+# Check crystal symmetry and exit (--symmetry)
+if options.is_check_symmetry:
+    check_symmetry(unitcell,
+                   primitive_axis=settings.get_primitive_matrix(),
+                   symprec=options.symprec,
+                   phonopy_version=phonopy_version)
+    if log_level > 0:
+        print_end()
+    sys.exit(0)
+    
+# Phonon calculation mode: Band, mesh, qpoints, etc
+run_mode = settings.get_run_mode()
+
+# --factor (overwrite default factor for calculators)
+if settings.get_frequency_conversion_factor() is not None:
+    factor = settings.get_frequency_conversion_factor()
+
+# --amplitude
+if settings.get_displacement_distance() is None:
+    ## units is bohr
+    if (interface_mode == 'wien2k' or
+        interface_mode == 'abinit' or
+        interface_mode == 'elk' or
+        interface_mode == 'pwscf' or
+        interface_mode == 'siesta' or
+        interface_mode == 'rmg'):
+        displacement_distance = 0.02
+    ## units is angstrom
+    else:
+        displacement_distance = 0.01
+else:
+    displacement_distance = settings.get_displacement_distance()
+    
+# Supercell matrix
+if settings.get_supercell_matrix() is None:
+    print_error_message("Supercell matrix (DIM or --dim) is not found.")
+    if log_level > 0:
+        print_end()
+    sys.exit(1)
+
+if run_mode == 'displacements':
+    phonon = Phonopy(unitcell, 
+                     settings.get_supercell_matrix(),
+                     primitive_matrix=settings.get_primitive_matrix(),
+                     factor=factor,
+                     is_auto_displacements=False,
+                     symprec=options.symprec,
+                     is_symmetry=settings.get_is_symmetry(),
+                     log_level=log_level)
+else: # Read FORCE_CONSTANTS or FORCE_SETS
+    num_atom = unitcell.get_number_of_atoms()
+    num_satom = determinant(settings.get_supercell_matrix()) * num_atom
+    if settings.get_is_force_constants() == 'read':
+        if settings.get_is_hdf5():
+            try:
+                import h5py
+            except ImportError:
+                print_error_message("You need to install python-h5py.")
+                if log_level > 0:
+                    print_end()
+                sys.exit(1)
+    
+            if file_exists("force_constants.hdf5", log_level):
+                fc = file_IO.read_force_constants_hdf5("force_constants.hdf5")
+                fc_filename = "force_constants.hdf5"
+        
+        elif file_exists("FORCE_CONSTANTS", log_level):
+            fc = file_IO.parse_FORCE_CONSTANTS(filename="FORCE_CONSTANTS")
+            fc_filename = "FORCE_CONSTANTS"
+    
+        if log_level > 0:
+            print("Force constants are read from %s." % fc_filename)
+    
+        if fc.shape[0] != num_satom:
+            error_text = ("Number of atoms in supercell is not consistent with "
+                          "the matrix shape of\nforce constants read from ")
+            if settings.get_is_hdf5():
+                error_text += "force_constants.hdf5.\n"
+            else:
+                error_text += "FORCE_CONSTANTS.\n"
+            error_text += ("Please carefully check DIM, FORCE_CONSTANTS, "
+                           "and %s.") % unitcell_filename
+            print_error_message(error_text)
+            if log_level > 0:
+                print_end()
+            sys.exit(1)
+    
+    elif os.path.exists("FORCE_SETS"):
+        force_sets = file_IO.parse_FORCE_SETS()
+        if force_sets['natom'] != num_satom:
+            error_text = "Number of atoms in supercell is not consistent with "
+            error_text += "the data in FORCE_SETS.\n"
+            error_text += ("Please carefully check DIM, FORCE_SETS,"
+                           " and %s") % unitcell_filename
+            print_error_message(error_text)
+            if log_level > 0:
+                print_end()
+            sys.exit(1)
+    else:
+        if log_level > 1:
+            print_end()
+            sys.exit(1)
+        else:
+            file_exists("FORCE_SETS", log_level)
+
+    phonon = Phonopy(unitcell,
+                     settings.get_supercell_matrix(),
+                     primitive_matrix=settings.get_primitive_matrix(),
+                     factor=factor,
+                     is_auto_displacements=False,
+                     dynamical_matrix_decimals=settings.get_dm_decimals(),
+                     force_constants_decimals=settings.get_fc_decimals(),
+                     symprec=options.symprec,
+                     is_symmetry=settings.get_is_symmetry(),
+                     use_lapack_solver=settings.get_lapack_solver(),
+                     log_level=log_level)
+   
+ 
+supercell = phonon.get_supercell()
+primitive = phonon.get_primitive()
+
+# Set atomic masses of primitive cell
+if settings.get_masses() is not None:
+    phonon.set_masses(settings.get_masses())
+
+# Log of phonopy settings
+if log_level > 0:
+    print_settings(settings)
+    if magmoms is None:
+        print("Spacegroup: %s" %
+              phonon.get_symmetry().get_international_table())
+
+# Print cells
+if log_level > 1:
+    print_cells(phonon, unitcell_filename)
+
+# Least displacements (write disp.yaml and SPOSCAR)
+if run_mode == 'displacements':
+    phonon.generate_displacements(
+        distance=displacement_distance,
+        is_plusminus=settings.get_is_plusminus_displacement(),
+        is_diagonal=settings.get_is_diagonal_displacement(),
+        is_trigonal=settings.get_is_trigonal_displacement())
+    displacements = phonon.get_displacements()
+    directions = phonon.get_displacement_directions()
+    file_IO.write_disp_yaml(displacements,
+                            supercell,
+                            directions=directions)
+    
+    # Write supercells with displacements
+    cells_with_disps = phonon.get_supercells_with_displacements()
+    
+    if interface_mode == 'wien2k':
+        npts, r0s, rmts = optional_structure_file_information[1:4]
+        write_supercells_with_displacements(
+            supercell,
+            cells_with_disps,
+            npts,
+            r0s,
+            rmts,
+            settings.get_supercell_matrix(),
+            filename=unitcell_filename)
+    elif interface_mode == 'abinit':
+        write_supercells_with_displacements(supercell, cells_with_disps)
+    elif interface_mode == 'pwscf':
+        pp_filenames = optional_structure_file_information[1]
+        write_supercells_with_displacements(supercell,
+                                            cells_with_disps,
+                                            pp_filenames)
+    elif interface_mode == 'elk':
+        sp_filenames = optional_structure_file_information[1]
+        write_supercells_with_displacements(supercell,
+                                            cells_with_disps,
+                                            sp_filenames)
+    elif interface_mode == 'siesta':
+        atypes = optional_structure_file_information[1]
+        write_supercells_with_displacements(supercell,
+                                            cells_with_disps,
+                                            atypes)
+    ## for rmg
+    elif interface_mode == 'rmg':
+        write_supercells_with_displacements(supercell, tags, cells_with_disps)
+        
+    else:        
+        write_supercells_with_displacements(supercell, cells_with_disps)
+
+    if log_level > 0:
+        print('')
+        print("disp.yaml and supercells have been created.")
+        print_end()
+    sys.exit(0)
+
+# Set force constants
+if settings.get_is_force_constants() == 'read':
+    phonon.set_force_constants(fc)
+elif os.path.exists("FORCE_SETS"):
+    phonon.set_displacement_dataset(force_sets)
+    if log_level > 0:
+        print("Computing force constants...")
+
+    if (settings.get_is_force_constants() == "write" or
+        settings.get_fc_symmetry_iteration() > 0 or
+        settings.get_fc_spg_symmetry()):
+        # Need to calculate full force constant tensors
+        phonon.produce_force_constants(
+            computation_algorithm=settings.get_fc_computation_algorithm())
+    else: # Only force constants between atoms in primitive cell and in supercell
+        phonon.produce_force_constants(
+            calculate_full_force_constants=False,
+            computation_algorithm=settings.get_fc_computation_algorithm())
+
+# Non-analytical term correction (LO-TO splitting)
+if settings.get_is_nac():
+    if file_exists("BORN", log_level):
+        nac_params = file_IO.get_born_parameters(
+            open("BORN"),
+            primitive,
+            phonon.get_primitive_symmetry())
+        if not nac_params:
+            error_text = "BORN file could not be read correctly."
+            print_error_message(error_text)
+            if log_level > 0:
+                print_end()
+            sys.exit(1)
+        if nac_params['factor'] == None:
+            nac_params['factor'] = nac_factor
+        phonon.set_nac_params(nac_params=nac_params)
+
+        if log_level > 1:
+            print("-" * 27 + " Dielectric constant " + "-" * 28)
+            for v in nac_params['dielectric']:
+                print("         %12.7f %12.7f %12.7f" % tuple(v))
+            print("-" * 26 + " Born effective charges " + "-" * 26)
+            symbols = primitive.get_chemical_symbols()
+            for i, (z, s) in enumerate(zip(nac_params['born'], symbols)):
+                for j, v in enumerate(z):
+                    if j == 0:
+                        text = "%5d %-2s" % (i + 1, s)
+                    else:
+                        text = "        "
+                    print("%s %12.7f %12.7f %12.7f" % ((text,) + tuple(v)))
+            print("-" * 76)
+
+# Impose cutoff radius on force constants
+cutoff_radius = settings.get_cutoff_radius()
+if cutoff_radius:
+    phonon.set_force_constants_zero_with_radius(cutoff_radius)
+
+# Enforce space group symmetry to force constants
+# this is very good and useful, better than my way
+if settings.get_fc_spg_symmetry():
+    if log_level > 0:
+        print('')
+        print("Force constants are symmetrized by space group operations.")
+        print("This may take some time...")
+    phonon.symmetrize_force_constants_by_space_group()
+    file_IO.write_FORCE_CONSTANTS(phonon.get_force_constants(),
+                                  filename='FORCE_CONSTANTS_SPG')
+    if log_level > 0:
+        print("Symmetrized force constants are written into "
+              "FORCE_CONSTANTS_SPG.")
+        
+# Imporse translational invariance and index permulation symmetry to
+# force constants
+if settings.get_fc_symmetry_iteration() > 0:
+    phonon.symmetrize_force_constants(settings.get_fc_symmetry_iteration())
+
+# Write FORCE_CONSTANTS
+if settings.get_is_force_constants() == "write":
+    if settings.get_is_hdf5():
+        file_IO.write_force_constants_to_hdf5(phonon.get_force_constants())
+        if log_level > 0:
+            print("Force constants are written into force_constants.hdf5.")
+    else:
+        file_IO.write_FORCE_CONSTANTS(phonon.get_force_constants())
+        if log_level > 0:
+            print("Force constants are written into FORCE_CONSTANTS.")
+
+# Show the rotational invariance condition (just show!)
+if settings.get_is_rotational_invariance():
+    phonon.get_rotational_condition_of_fc()
+
+# Atomic species without mass case
+symbols_with_no_mass = []
+if primitive.get_masses() is None:
+    for s in primitive.get_chemical_symbols():
+        if (atom_data[symbol_map[s]][3] is None and
+            s not in symbols_with_no_mass):
+            symbols_with_no_mass.append(s)
+            print_error_message(
+                "Atomic mass of \'%s\' is not implemented in phonopy." % s)
+            print_error_message("MASS tag can be used to set atomic masses.")
+
+if len(symbols_with_no_mass) > 0:
+    if log_level > 0:
+        print_end()
+    sys.exit(1)
+
+# Group velocity
+if settings.get_is_group_velocity():
+    phonon.set_group_velocity(q_length=settings.get_group_velocity_delta_q())
+
+##########################
+# Solve dynamical matrix #
+##########################
+    
+# QPOINTS mode
+if run_mode == 'qpoints':
+    if settings.get_qpoints():
+        q_points = settings.get_qpoints()
+        if log_level > 0:
+            print("Q-points that will be calculated at:")
+            for q in q_points:
+                print("    %s" % q)
+    else:
+        q_points = file_IO.parse_QPOINTS()
+        if log_level > 0:
+            print("Frequencies at q-points given by QPOINTS:")
+    phonon.set_qpoints_phonon(
+        q_points,
+        nac_q_direction=settings.get_nac_q_direction(),
+        is_eigenvectors=settings.get_is_eigenvectors(),
+        write_dynamical_matrices=settings.get_write_dynamical_matrices(),
+        factor=factor)
+    phonon.write_yaml_qpoints_phonon()
+
+# Band structure and mesh sampling
+elif run_mode == 'band' or run_mode == 'mesh' or run_mode == 'band_mesh':
+    if run_mode == 'band' or run_mode == 'band_mesh':
+        bands = settings.get_bands()
+        if log_level > 0:
+            print("Reciprocal space paths in reduced coordinates:")
+            for band in bands:
+                print("[%5.2f %5.2f %5.2f] --> [%5.2f %5.2f %5.2f]" % 
+                      (tuple(band[0]) + tuple(band[-1])))
+    
+        phonon.set_band_structure(
+            bands,
+            is_eigenvectors=settings.get_is_eigenvectors(),
+            is_band_connection=settings.get_is_band_connection())
+        phonon.write_yaml_band_structure(labels=settings.get_band_labels())
+    
+        if options.is_graph_plot and run_mode != 'band_mesh':
+            plot = phonon.plot_band_structure(labels=settings.get_band_labels())
+            if options.is_graph_save:
+                plot.savefig('band.pdf')
+            else:
+                plot.show()
+
+    if run_mode == 'mesh' or run_mode == 'band_mesh':
+        (mesh,
+         mesh_shift,
+         t_symmetry,
+         q_symmetry,
+         is_gamma_center) =  settings.get_mesh()
+        phonon.set_mesh(mesh,
+                        mesh_shift,
+                        is_time_reversal=t_symmetry,
+                        is_mesh_symmetry=q_symmetry,
+                        is_eigenvectors=settings.get_is_eigenvectors(),
+                        is_gamma_center=settings.get_is_gamma_center())
+        weights = phonon.get_mesh()[1]
+        if log_level > 0:
+            if q_symmetry:
+                print("Number of irreducible q-points on sampling mesh: "
+                      "%d/%d" % (weights.shape[0], np.prod(mesh)))
+            else:
+                print("Number of q-points on sampling mesh: %d" %
+                      weights.shape[0])
+    
+        if settings.get_write_mesh():
+            if settings.get_is_hdf5():
+                phonon.write_hdf5_mesh()
+            else:
+                phonon.write_yaml_mesh()
+    
+        # Thermal property
+        if settings.get_is_thermal_properties():
+            if log_level > 0:
+                print("Calculating thermal properties...")
+            tprop_range = settings.get_thermal_property_range()
+            tstep = tprop_range['step']
+            tmax = tprop_range['max']
+            tmin = tprop_range['min']
+            phonon.set_thermal_properties(
+                tstep,
+                tmax,
+                tmin,
+                is_projection=settings.get_is_projected_thermal_properties(),
+                band_indices=settings.get_band_indices(),
+                cutoff_frequency=settings.get_cutoff_frequency())
+            phonon.write_yaml_thermal_properties()
+    
+            if log_level > 0:
+                print("#%11s %15s%15s%15s%15s" % ('T [K]',
+                                                  'F [kJ/mol]',
+                                                  'S [J/K/mol]',
+                                                  'C_v [J/K/mol]',
+                                                  'E [kJ/mol]'))
+                temps, fe, entropy, heat_capacity = phonon.get_thermal_properties()
+                for T, F, S, CV in zip(temps, fe, entropy, heat_capacity):
+                    print(("%12.3f " + "%15.7f" * 4) %
+                          (T, F, S, CV, F + T * S / 1000))
+    
+            if options.is_graph_plot:
+                plot = phonon.plot_thermal_properties()
+                if options.is_graph_save:
+                    plot.savefig('thermal_properties.pdf')
+                else:
+                    plot.show()
+    
+        # Thermal displacements
+        elif settings.get_is_thermal_displacements():
+            p_direction = settings.get_projection_direction()
+            if log_level > 0:
+                if p_direction is not None:
+                    print("Projection direction: %s" % np.array(p_direction))
+                print("Calculating thermal displacements...")
+            tprop_range = settings.get_thermal_property_range()
+            tstep = tprop_range['step']
+            tmax = tprop_range['max']
+            tmin = tprop_range['min']
+            phonon.set_thermal_displacements(
+                tstep,
+                tmax,
+                tmin,
+                direction=p_direction,
+                cutoff_frequency=settings.get_cutoff_frequency())
+            phonon.write_yaml_thermal_displacements()
+    
+            if options.is_graph_plot:
+                plot = phonon.plot_thermal_displacements(options.is_legend)
+                if options.is_graph_save:
+                    plot.savefig('thermal_displacement.pdf')
+                else:
+                    plot.show()
+    
+        # Thermal displacement matrices
+        elif settings.get_is_thermal_displacement_matrices():
+            if log_level > 0:
+                print("Calculating thermal displacement matrices...")
+            tprop_range = settings.get_thermal_property_range()
+            tstep = tprop_range['step']
+            tmax = tprop_range['max']
+            tmin = tprop_range['min']
+            phonon.set_thermal_displacement_matrices(
+                tstep,
+                tmax,
+                tmin,
+                cutoff_frequency=settings.get_cutoff_frequency())
+            phonon.write_yaml_thermal_displacement_matrices()
+    
+        # Thermal distances
+        elif settings.get_is_thermal_distances():
+            if log_level > 0:
+                print("Calculating thermal distances...")
+            tprop_range = settings.get_thermal_property_range()
+            tstep = tprop_range['step']
+            tmax = tprop_range['max']
+            tmin = tprop_range['min']
+            phonon.set_thermal_distances(
+                settings.get_thermal_atom_pairs(),
+                tstep,
+                tmax,
+                tmin,
+                cutoff_frequency=settings.get_cutoff_frequency())
+            phonon.write_yaml_thermal_distances()
+    
+        # Partial DOS
+        elif (settings.get_is_eigenvectors() and
+            (options.is_graph_plot or settings.get_is_dos_mode())):
+            p_direction = settings.get_projection_direction()
+            if log_level > 0:
+                if p_direction is not None:
+                    print("Projection direction: %" % np.array(p_direction))
+                print("Calculating partial DOS...")
+            dos_range = settings.get_dos_range()
+            phonon.set_partial_DOS(
+                sigma=settings.get_sigma(),
+                freq_min=dos_range['min'],
+                freq_max=dos_range['max'],
+                freq_pitch=dos_range['step'],
+                tetrahedron_method=settings.get_is_tetrahedron_method(),
+                direction=p_direction)
+            phonon.write_partial_DOS()
+    
+            if options.is_graph_plot:
+                pdos_indices = settings.get_pdos_indices()
+                if pdos_indices is None:
+                    pdos_indices = [[x] for x in
+                                    range(primitive.get_number_of_atoms())]
+
+            if options.is_graph_plot and run_mode != 'band_mesh':
+                plot = phonon.plot_partial_DOS(
+                    pdos_indices=pdos_indices,
+                    legend=([np.array(x) + 1 for x in pdos_indices]))
+                if options.is_graph_save:
+                    plot.savefig('partial_dos.pdf')
+                else:
+                    plot.show()
+    
+        # Total DOS
+        elif (options.is_graph_plot or settings.get_is_dos_mode()):
+            dos_range = settings.get_dos_range()
+            
+            phonon.set_total_DOS(
+                sigma=settings.get_sigma(),
+                freq_min=dos_range['min'],
+                freq_max=dos_range['max'],
+                freq_pitch=dos_range['step'],
+                tetrahedron_method=settings.get_is_tetrahedron_method())
+    
+            if log_level > 0:
+                print("Calculating DOS...")
+    
+            if settings.get_fits_Debye_model():
+                phonon.set_Debye_frequency()
+                if log_level > 0:
+                    debye_freq = phonon.get_Debye_frequency()
+                    print("Debye frequency: %10.5f" % debye_freq)
+            phonon.write_total_DOS()
+    
+            if options.is_graph_plot and run_mode != 'band_mesh':
+                plot = phonon.plot_total_DOS()
+                if options.is_graph_save:
+                    plot.savefig('total_dos.pdf')
+                else:
+                    plot.show()
+
+    if (run_mode == 'band_mesh' and
+        options.is_graph_plot and
+        not settings.get_is_thermal_properties() and
+        not settings.get_is_thermal_displacements() and
+        not settings.get_is_thermal_displacement_matrices() and
+        not settings.get_is_thermal_distances()):
+        if settings.get_is_eigenvectors():
+            plot = phonon.plot_band_structure_and_dos(
+                pdos_indices=pdos_indices,
+                labels=settings.get_band_labels())
+        else:
+            plot = phonon.plot_band_structure_and_dos(
+                labels=settings.get_band_labels())
+        if options.is_graph_save:
+            plot.savefig('band_dos.pdf')
+        else:
+            plot.show()
+
+
+# Animation        
+elif run_mode == 'anime':
+    anime_type = settings.get_anime_type()
+    if anime_type == "v_sim":
+        q_point = settings.get_anime_qpoint()
+        amplitude = settings.get_anime_amplitude()
+        phonon.write_animation(q_point=q_point,
+                               anime_type='v_sim',
+                               amplitude=amplitude)
+        if log_level > 0:
+            print("Animation type: v_sim")
+            print("q-point: [%6.3f %6.3f %6.3f]" % tuple(q_point))
+    else:
+        amplitude = settings.get_anime_amplitude()
+        band_index = settings.get_anime_band_index()
+        division = settings.get_anime_division()
+        shift = settings.get_anime_shift()
+        phonon.write_animation(anime_type=anime_type,
+                               band_index=band_index,
+                               amplitude=amplitude,
+                               num_div=division,
+                               shift=shift)
+
+        if log_level > 0:
+            print("Animation type: %s" % anime_type)
+            print("amplitude: %f" % amplitude)
+            if anime_type != "jmol":
+                print("band index: %d" % band_index)
+                print("Number of images: %d" % division)
+
+# Modulation
+elif run_mode == 'modulation':
+    mod_setting = settings.get_modulation()
+    phonon_modes = mod_setting['modulations']
+    dimension = mod_setting['dimension']
+    if 'delta_q' in mod_setting:
+        delta_q = mod_setting['delta_q']
+    else:
+        delta_q = None
+    derivative_order = mod_setting['order']
+        
+    phonon.set_modulations(dimension,
+                           phonon_modes,
+                           delta_q=delta_q,
+                           derivative_order=derivative_order,
+                           nac_q_direction=settings.get_nac_q_direction())
+    phonon.write_modulations()
+    phonon.write_yaml_modulations()
+
+# Ir-representation
+elif run_mode == 'irreps':
+    if phonon.set_irreps(settings.get_irreps_q_point(),
+                         is_little_cogroup=settings.get_is_little_cogroup(),
+                         nac_q_direction=settings.get_nac_q_direction(),
+                         degeneracy_tolerance=settings.get_irreps_tolerance()):
+        show_irreps = settings.get_show_irreps()
+        phonon.show_irreps(show_irreps)
+        phonon.write_yaml_irreps(show_irreps)
+
+else:
+    print("-" * 76)
+    print(" One of the following run modes may be specified for phonon "
+          "calculations.")
+    for mode in ['Mesh sampling (MP, --mesh)',
+                 'Q-points (QPOINTS, --qpoints)',
+                 'Band structure (BAND, --band)',
+                 'Animation (ANIME, --anime)',
+                 'Modulation (MODULATION, --modulation)',
+                 'Characters of Irreps (IRREPS, --irreps)',
+                 'Create displacements (-d)']:
+        print(" - %s" % mode)
+    print("-" * 76)
+
+# END
+if log_level > 0:
+    print_end()
