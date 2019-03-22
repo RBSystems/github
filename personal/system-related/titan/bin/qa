@@ -1,0 +1,47 @@
+#! /bin/bash
+
+user=z8j
+all_users=z8j,timmy,yqcheng,chenwli,wenchang
+lastline=`qstat -u ${all_users} | wc -l`
+
+qstat -u ${all_users}
+
+qstat -u ${all_users} | awk -v lastline="$lastline" -v user="$user" '
+    (NR>5 && $10=="R"){
+         all_R_jobs=all_R_jobs+1;
+         all_R_nodes=all_R_nodes+$6;
+         all_R_cores=all_R_cores+$7;
+         if ($2==user){
+            user_R_jobs=user_R_jobs+1;
+            user_R_nodes=user_R_nodes+$6;
+            user_R_cores=user_R_cores+$7;}
+    }
+    (NR>5 && $10=="Q"){
+         all_Q_jobs=all_Q_jobs+1;
+         all_Q_nodes=all_Q_nodes+$6;
+         all_Q_cores=all_Q_cores+$7;
+         if ($2==user){
+            user_Q_jobs=user_Q_jobs+1;
+            user_Q_nodes=user_Q_nodes+$6;
+            user_Q_cores=user_Q_cores+$7;}
+    }
+    NR==lastline{
+         printf"\n\n**************************************************\n";
+         printf"*                ";
+         printf"Running jobs info";
+         printf"               *\n";
+         printf"**************************************************\n";
+         printf"--------------------------------------------------\n";
+         printf"|   user   |        %3s       |        All       |\n", user;
+         printf"--------------------------------------------------\n";
+         printf"|   status | Running | Queued | Running | Queued |\n"
+         printf"--------------------------------------------------\n";
+         printf"|   jobs   | %7d | %6d | %7d | %6d |\n", user_R_jobs, user_Q_jobs, all_R_jobs, all_Q_jobs;
+         printf"--------------------------------------------------\n";
+         printf"|   nodes  | %7d | %6d | %7d | %6d |\n", user_R_nodes, user_Q_nodes, all_R_nodes, all_Q_nodes;
+         printf"--------------------------------------------------\n";
+         printf"|   cores  | %7d | %6d | %7d | %6d |\n", user_R_cores, user_Q_cores, all_R_cores, all_Q_cores;
+         printf"--------------------------------------------------\n\n"
+    }'
+#qstat -u z8j,yyc | awk 'NR>5{printf"%10d\n",$7}
+

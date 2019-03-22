@@ -1,0 +1,16 @@
+Currently Loaded Modulefiles:
+  1) gcc/5.3.0        3) xalt/0.7.5
+  2) openmpi/1.10.3   4) PE-gnu/1.0
+Thu Mar 15 14:46:50 EDT 2018
+[or-condo-c65:18953] *** Process received signal ***
+[or-condo-c65:18953] Signal: Segmentation fault (11)
+[or-condo-c65:18953] Signal code: Address not mapped (1)
+[or-condo-c65:18953] Failing at address: 0x2b46ebb8b700
+[or-condo-c245:13298] *** Process received signal ***
+[or-condo-c245:13298] Signal: Segmentation fault (11)
+[or-condo-c245:13298] Signal code:  (128)
+[or-condo-c245:13298] Failing at address: (nil)
+[or-condo-c245:13299] *** Process received signal ***
+[or-condo-c245:13299] Signal: Segmentation fault (11)
+[or-condo-c245:13299] Signal code:  (128)
+[or-condo-c245:13299] Failing at address: (nil)

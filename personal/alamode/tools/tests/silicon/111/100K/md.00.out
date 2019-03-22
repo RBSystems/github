@@ -1,0 +1,107 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ num_k 14
+ kvec 0  0.000000 0.000000 0.000000 0.037037
+
+ kvec 1  0.333333 0.000000 0.000000 0.074074
+
+ kvec 2  0.000000 0.333333 0.000000 0.074074
+
+ kvec 3  0.333333 0.333333 0.000000 0.074074
+
+ kvec 4  -0.333333 0.333333 0.000000 0.074074
+
+ kvec 5  0.000000 0.000000 0.333333 0.074074
+
+ kvec 6  0.333333 0.000000 0.333333 0.074074
+
+ kvec 7  -0.333333 0.000000 0.333333 0.074074
+
+ kvec 8  0.000000 0.333333 0.333333 0.074074
+
+ kvec 9  0.333333 0.333333 0.333333 0.074074
+
+ kvec 10  -0.333333 0.333333 0.333333 0.074074
+
+ kvec 11  0.000000 -0.333333 0.333333 0.074074
+
+ kvec 12  0.333333 -0.333333 0.333333 0.074074
+
+ kvec 13  -0.333333 -0.333333 0.333333 0.074074
+Auto processor grid settings: npes=32 PE_X=4 PE_Y=4 PE_Z=2
+RMG running with 1 threads set via OMP_NUM_THREADS.
+C4: Numa aware allocation with 32 MPI procs, 36 cores and 2 numa nodes per host.
+C2: Numa aware allocation with 32 MPI procs, 32 cores and 2 numa nodes per host.
+
+               * * * * * * * * * *
+               *    R   M   G    *
+               * * * * * * * * * *
+
+ -- A Real Space Multigrid Electronic structure code --
+ --      More information at www.rmgdft.org          --
+
+ quench: [md:   0/1000  scf:   0/200  step time:  26.69  scf time:    27.70 secs  RMS[dV]: 1.15e-02 ]
+ quench: [md:   0/1000  scf:   1/200  step time:  30.98  scf time:    58.69 secs  RMS[dV]: 1.52e-02 ]

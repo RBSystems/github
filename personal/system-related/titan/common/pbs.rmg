@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#PBS -A nti108
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -l walltime=00:20:00
+#PBS -l nodes=16
+#PBS -N zrh2.mod.rlx@/lustre/atlas2/nti108/scratch/z8j/ZrH2/frophon_calc/rmg_mod/relax
+
+source $MODULESHOME/init/bash
+module swap PrgEnv-pgi PrgEnv-gnu
+module list
+
+setenv OMP_NUM_THREADS 1
+
+
+cd /lustre/atlas2/nti108/scratch/z8j/ZrH2/frophon_calc/rmg_mod/relax/
+
+date
+
+aprun -n 256 -N 16 -d 1 /ccs/home/z8j/bin/rmg-cpu rmg.in > rmg.01.out
+
+date

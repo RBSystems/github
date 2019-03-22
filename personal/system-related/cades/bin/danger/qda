@@ -1,0 +1,4 @@
+#!/bin/bash
+# usage: qdel all jobs
+
+qstat -u z8j | awk 'NR>5{system("qdel " $1)}'

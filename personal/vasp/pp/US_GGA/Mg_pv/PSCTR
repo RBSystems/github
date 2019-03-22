@@ -1,0 +1,16 @@
+   TITEL  = US Mg
+   LULTRA =    T      NCPP  
+   RPACOR =    1.40                  
+   RWIGS  =    2.00  nn distance   
+                                      
+   ICORE  =    2                      
+   NE     =   100                     
+   LCOR   =   .TRUE.                  
+   QCUT   =   -1                      
+                                      
+   Description                        
+ l     E      TYP  RCUT    TYP  RCUT  
+ 0   0         7    2.00   7    2.0
+ 1   0         7    1.70   23   2.0
+ 1  -0.2       7    2.00   23   2.0
+ 2   0.0       7    2.00   7    2.0

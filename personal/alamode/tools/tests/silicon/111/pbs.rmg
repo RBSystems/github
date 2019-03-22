@@ -1,0 +1,30 @@
+#! /bin/bash
+
+#PBS -A sns
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l qos=long
+#PBS -W group_list=cades-virtues
+#PBS -l walltime=300:00:00
+#PBS -l nodes=2:ppn=32
+#PBS -N si.rmg.111.nvt-300K@/home/z8j/github-ncsu/personal/alm/tools/tests/silicon/111
+
+module load PE-gnu
+module list
+
+export OMP_NUM_THREADS=1
+
+cd /home/z8j/github-ncsu/personal/alm/tools/tests/silicon/111/
+
+date
+
+mpirun -np 64 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu md.in > md.00.out
+
+date
+
+if [ ! `grep WARNING oe.$PBS_JOBID OUTCAR` = '' ]; then
+  grep WARNING oe.$PBS_JOBID OUTCAR >> WARNING
+fi

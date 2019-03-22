@@ -1,0 +1,19 @@
+   TITEL  = US Ca
+   LULTRA =    T    use ultrasoft PP ?
+   RPACOR =    1.46                  
+   RWIGS  =    3.68  nn distance   
+                                      
+   RCLOC  =    1.69                  
+   EMIN   =   -3                      
+   NE     =   100                     
+   LCOR   =   .TRUE.                  
+   QCUT   =   -1                      
+                                      
+   Description                        
+ l     E      TYP  RCUT    TYP  RCUT  
+ 0   0         15   3.29  23   3.29  
+ 0   2.0       15   3.29  23   3.29  
+ 1  -0.2       15   3.29  23   3.68  
+ 1   2.0       15   3.29  23   3.68  
+ 2   0         7    2.99  23   3.68  
+ 2   0.0       7    2.99  23   3.68  

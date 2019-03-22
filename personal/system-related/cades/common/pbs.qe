@@ -1,0 +1,28 @@
+#! /bin/bash
+
+#PBS -A sns
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l qos=long
+#PBS -W group_list=cades-virtues
+#PBS -l walltime=300:00:00
+#PBS -l nodes=4:ppn=32
+#PBS -N STO.nvt-coll@/lustre/or-hydra/cades-virtues/z8j/run/SrTiO3/qe/equilibration/nvt
+
+module load PE-gnu
+module load openmpi
+module load mkl
+module list
+
+export OMP_NUM_THREADS=1
+
+cd /lustre/or-hydra/cades-virtues/z8j/run/SrTiO3/qe/equilibration/nvt/
+
+date
+
+mpirun -np 128 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/softwares/qe-6.2.1/bin/pw.x < qe.in > qe.02.out
+
+date

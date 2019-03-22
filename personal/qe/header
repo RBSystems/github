@@ -1,0 +1,29 @@
+ &control
+    calculation = 'scf',
+    nstep = 300,
+    etot_conv_thr = 1.0d-4,
+    forc_conv_thr = 2.0d-3,
+    tprnfor = .true.
+    tstress = .true.
+    restart_mode = 'from_scratch',
+    prefix = 'ammonia',
+    outdir = 'Waves',
+    pseudo_dir = '/u/sciteam/zhang7/svn_personal/qe/pp'
+ /
+ &system
+    ibrav = 0
+    ntyp = 2,
+    nat = 1024,
+    occupations = 'fixed',
+    ecutwfc = 80
+ /
+ &electrons
+    diagonalization = 'david',
+    mixing_beta = 0.7,
+    conv_thr = 1.d-8,
+    electron_maxstep = 1000,
+    startingwfc = 'atomic+random'
+ /
+
+K_POINTS automatic
+  1 1 1 0 0 0

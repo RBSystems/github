@@ -1,0 +1,42 @@
+#! /bin/bash
+
+#PBS -A sns
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l qos=std
+#PBS -W group_list=cades-virtues
+#PBS -l walltime=10:00:00
+#PBS -l nodes=1:ppn=32
+#PBS -N Carb.climax
+
+module load PE-intel/1.0
+module load mkl
+module load anaconda2
+#module load openmpi
+module list
+
+export OMP_NUM_THREADS=1
+
+cd $PBS_O_WORKDIR
+
+date
+
+seed=Carb
+
+echo -e "evec2yaml.py...\n"
+~/github-ncsu/personal/alamode/evec2yaml.py $seed
+
+echo -e "2climax.py...\n"
+~/bin/2climax.py -yaml $seed.yaml
+
+echo -e "oclimax.mpi...\n"
+mpirun -np 32 --map-by ppr:32:node:pe=1 ~/bin/oclimax.mpi out.aclimax
+
+~/github-ncsu/personal/climax/csv2dat.py *csv
+
+wait
+
+date

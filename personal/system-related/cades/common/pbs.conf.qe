@@ -1,0 +1,22 @@
+# required
+NODES       = 8
+TIME        = 50 30 # in units of hrs, mins
+EXEINPUT    = qe.in
+EXEPATH     = /home/z8j/softwares/qe-6.2/bin/pw.x
+#EXEPATH     = /software/user_tools/current/cades-virtues/apps/quantum-espresso/intel/espresso/5.4.0/pw.x
+THREADS     = 1
+ACCOUNT     = sns
+
+# optional
+NAME        = carb-rlx-qe
+IS_SUBMIT   = true
+QUEUE       = None
+module      = PE-gnu
+module      = openmpi
+module      = mkl
+#module      = /software/tools/modules/env/cades-virtues
+#module      = /software/tools/modules/compilers/intel/2016.1
+#module      = /software/tools/modules/utils/intel/mkl/2016.1
+#module      = /software/tools/modules/mpi/openmpi/intel/1.10.2
+#module      = /software/user_tools/current/modules/cades-virtues/env/intel
+#module      = /software/user_tools/current/modules/cades-virtues/espresso/5.4.0

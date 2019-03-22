@@ -1,0 +1,13 @@
+**************************************************
+*        Modify at ~/common/ssh-welcome          *
+**************************************************
+*                  TODO list
+**************************************************
+*   1. rewrite interface for RMG in Phonopy
+*   2. write auto tools for RMG
+*   3. write a code to generate supercell/modify
+*        phonopy
+**************************************************
+*             Current working notes
+**************************************************
+

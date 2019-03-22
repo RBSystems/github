@@ -1,0 +1,6 @@
+Currently Loaded Modulefiles:
+  1) gcc/5.3.0        3) xalt/0.7.5
+  2) openmpi/1.10.3   4) PE-gnu/1.0
+Thu Mar  1 17:12:18 EST 2018
+Fri Mar  2 09:11:10 EST 2018
+grep: OUTCAR: No such file or directory

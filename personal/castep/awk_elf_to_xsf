@@ -1,0 +1,90 @@
+#!/bin/csh -f
+#convert a periodic ELF grid (eg FFT=$1) to general XSF form ($2) 
+#NB HEADER will require customising but grid stuff should all be OK
+#NB This generic template is set for si2 in primitive cell
+
+#make sure in correct order (parallel runs)
+sort -n -k3 -k2 -k1 $1 > $2.tmp0
+
+set elf_ngx=`tail -1 $2.tmp0 | awk '{print $1}'`
+set elf_ngy=`tail -1 $2.tmp0 | awk '{print $2}'`
+set elf_ngz=`tail -1 $2.tmp0 | awk '{print $3}'`
+
+set general_ngx=$elf_ngx
+@ general_ngx++
+set general_ngy=$elf_ngy
+@ general_ngy++
+set general_ngz=$elf_ngz
+@ general_ngz++
+
+#XSF header
+cat << 'end_header' > $2.header
+CRYSTAL
+
+#primitive lattice vectors in Angstoms - need to edit
+#format = ax ay az on each line
+PRIMVEC
+ 2.6728636   2.6728636   0.0000000
+ 2.6728636   0.0000000   2.6728636
+ 0.0000000   2.6728636   2.6728636
+
+#coordinates of atoms in primitive cell
+#first line: total number of atoms - need to edit, second number always 1
+#other lines are list of atomic coords - need to edit
+#format = AtomicNumber rx ry rz in Cartesian Angstroms
+PRIMCOORD
+2 1
+14 0.000 0.000 0.000
+14 1.350 1.350 1.350
+
+#For 3D DATAGRID, first block of 5 numbers are:
+#size of grid in X Y Z directions - need to edit
+#(this is NGX+1 if general or NGX if periodic)
+#origin of datagrid
+#spanning vectors of datagrid - SET TO PRIMVEC - need to edit
+ BEGIN_BLOCK_DATAGRID_3D                        
+   ELF
+   BEGIN_DATAGRID_3D_this_is_3Dgrid#1
+'end_header'
+echo '     '$general_ngx $general_ngy $general_ngz >> $2.header
+cat << 'end_header2' >> $2.header
+     0.0 0.0 0.0 
+ 2.6728636   2.6728636   0.0000000
+ 2.6728636   0.0000000   2.6728636
+ 0.0000000   2.6728636   2.6728636
+'end_header2'
+
+#convert periodic -> general grid
+awk -v ngx=$elf_ngx -v ngy=$elf_ngy -v ngz=$elf_ngz  '{data[$1,$2,$3]=$4} END { \
+     {for (i=1;i<=ngx;i++) \
+          {for (j=1;j<=ngy;j++) \
+               {for (k=1;k<=ngz;k++) \
+                    {print i,j,k,data[i,j,k]}; \
+                print i,j,ngz+1,data[i,j,1]}; \
+           for (k=1;k<=ngz;k++) {print i,ngy+1,k,data[i,1,k]}; \
+           print i,ngy+1,ngz+1,data[i,1,1]}; \
+           {for (j=1;j<=ngy;j++) \
+                {for (k=1;k<=ngz;k++) \
+                     {print ngx+1,j,k,data[1,j,k]}; \
+                     print ngx+1,j,ngz+1,data[1,j,1]}; \
+                 for (k=1;k<=ngz;k++) {\
+                     print ngx+1,ngy+1,k,data[1,1,k]};\
+           print ngx+1,ngy+1,ngz+1,data[1,1,1]}}}' $2.tmp0 > $2.tmp1
+
+#convert grid to XSF block form
+#general grid use:
+awk -v ngz=$elf_ngz '{for (i=1;i<=ngz;i++) {printf("%5.3f ",$4);getline}; printf("%5.3f \n",$4)}' $2.tmp1 > $2.tmp2
+#periodic grid use:
+#awk -v ngz=$elf_ngz '{for (i=1;i<=ngz-1;i++) {printf("%5.3f ",$4);getline}; printf("%5.3f \n",$4)}' $1 > $2.tmp2
+
+#XSF footer
+cat << 'end_footer' > $2.footer
+END_DATAGRID_3D                      
+END_BLOCK_DATAGRID_3D
+'end_footer'
+
+#put it all together
+cat $2.header $2.tmp2 $2.footer > $2
+
+#cleanup at end
+rm -f $2.header $2.tmp0 $2.tmp1 $2.tmp2 $2.footer

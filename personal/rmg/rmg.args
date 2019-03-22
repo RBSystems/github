@@ -1,0 +1,40 @@
+# General parameters control for post process of RMG
+
+
+DIM = 2 2 2
+SIGMA = 10.0
+
+#############################
+#   mesh conf
+#############################
+DIM = 4 4 4
+ATOM_name = C O
+MP = 1 1 1
+EIGENVECTORS = .TRUE.
+
+#############################
+#   animation conf
+#############################
+DIM = 4 4 4
+FC_SYMMETRY = 10
+CUTOFF_RADIUS = 15.0
+ANIME_TYPE = V_SIM
+ANIME = 0.0 0.0 0.0
+
+#############################
+#   band conf
+#############################
+
+DIM = 4 4 4
+FC_SYMMETRY = 10
+CUTOFF_RADIUS = 15.0
+PRIMITIVE_AXIS = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
+BAND = 0.0 0.0 0.0  0.0 0.0 0.5  0.0 0.5 0.5  0 0.5 0.0  0.5 0.5 0.0  0.5 0.0 0.0  0.5 0.0 0.5  0.5 0.5 0.5
+BAND_LABELS = \Gamma Z T Y S X U R
+
+#############################
+#   dos conf
+#############################
+DIM =  4 4 4
+DOS = .TRUE.
+DOS_RANGE = 0 40 0.02

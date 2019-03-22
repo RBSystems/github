@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#PBS -q batch
+#PBS -j oe
+#PBS -A sns
+#PBS -l qos=condo
+#PBS -W group_list=cades-virtues
+#############################
+
+#PBS -l walltime=00:29:00
+#PBS -l nodes=1:ppn=32
+########################
+#PBS -N espresso.test
+
+#module load linux-x86_64/openmpi@1.10.2%gcc@4.8.5~psm~tm+verbs-a5vm5ga
+module load PE-gnu
+module list
+
+export OMP_NUM_THREADS=1
+##export OMP_NUM_THREADS=2
+espresso=/home/z8j/softwares/espresso-5.4.0/bin/pw.x
+
+
+cd $PBS_O_WORKDIR
+date
+
+#mpirun -n 192 -N 16 -d $OMP_NUM_THREADS -cc numa_node ~/public/rmg-cpu rmg.in
+mpirun -np 4 ${espresso} < Si.sample.in > Si.sample.out

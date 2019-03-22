@@ -1,0 +1,291 @@
+#!/usr/bin/env perl
+
+#
+# Read CASTEP .phonon output of a phonon calculation and recalculate
+# the frequencies after performing an isotopic substitution.
+# New masses are read from <>.icell and new .phonon file written
+# to <>.iphonon
+#
+
+#    Copyright (c) Keith Refson 1998-2012
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use Cwd 'abs_path';
+BEGIN {$mypath = $0;
+       $mypath = abs_path($mypath);
+       if ($mypath =~ /^[A-Za-z]:/) {$mypath =~ s@[^\\]+$@@; } else {$mypath =~ s@[^/]+$@@;}
+     }
+use lib "$mypath";
+use ceteprouts;
+
+use POSIX;
+
+use strict 'vars';
+
+my $fnumber = qr/-?(?:\d+\.?\d*|\d*\.?\d+)/o;
+my $number  = qr/$fnumber(?:[Ee][+-]?\d{1-3})?/o;
+
+my ($mode, $ampl, $nameseed, $title, $iq, $nqz, $ion, $amplitude,$verbose, $jmol_out, $outrot);
+my ($aa, $bb, $cc, $alpha, $beta, $gamma);
+my (@a, @b, @c, @ar, @br, @cr,@atomx, @atomy, @atomz,@atyi, @freq, @eigvecs,
+    @kptx, @kpty, @kptz, @wt, @qptx, @qpty, @qptz, @qwt,@supercell);
+my ($supercell_arg,$qpoint,@imass,$n3,@qvec,$i,$nqpts,$renorm, $modestr,$q,
+    @qvec_super, @pertxr,@pertyr,@pertzr,@pertxi,@pertyi,@pertzi,
+    @pertar,@pertbr,@pertcr,@pertai,@pertbi,@pertci,@offset);
+my ($make_supercell);
+my (@shiftlist, @atomxe, @atomye, @atomze, @atyie, @shiftlist, @pertxe, @pertye, @pertze);
+my ($JMolCommand);
+
+#
+# Process Args
+#
+$mode = 0;
+$qpoint = -1;
+$renorm = 0;
+$verbose = 0;
+$amplitude = 1.0;
+$make_supercell = 0;
+$jmol_out = 0;
+@offset=(0,0,0);
+while ( $ARGV[0] =~ /^-/ ) {
+  if ( $ARGV[0] eq "-a" && $#ARGV > 1 ) {
+    shift @ARGV;
+    $amplitude = shift @ARGV;
+  }
+  if ( $ARGV[0] eq "-c" ) {
+    shift @ARGV;
+    die "Usage: -c a1 a2 a3 b1 b2 b3 c1 c2 c3" if ( $#ARGV < 8 );
+    @supercell = splice @ARGV, 0,9;
+    $supercell_arg++;
+    $make_supercell++;
+ }
+  if ( $ARGV[0] eq "-q" && $#ARGV > 1 ) {
+    shift @ARGV;
+    $qpoint = shift @ARGV;
+    $qpoint = $qpoint - 1;
+  }
+  if ( $ARGV[0] eq "-s" && $#ARGV > 1 ) {
+    shift @ARGV;
+    @offset = splice @ARGV, 0, 3;
+    $renorm++;
+  }
+  if ( $ARGV[0] eq "-v" && $#ARGV > 0 ) {
+    shift @ARGV;
+    $verbose++;
+  }
+  if ( $ARGV[0] eq "-j" && $#ARGV > 0 ) {
+    shift @ARGV;
+    $jmol_out++;
+  }
+}
+
+$nameseed = $ARGV[0]; $nameseed =~ s/\.(castep|phonon|cell|param|icell|iphonon).*//;
+#
+# Read in .phonon file.
+#
+{
+  local @ARGV=("$nameseed.phonon");
+  ReadNewtepPhonon(\@a, \@b, \@c, \@atomx, \@atomy, \@atomz,
+                   \@atyi, \@imass, \@freq, \@eigvecs,
+                   \@qptx, \@qpty, \@qptz, \@qwt);
+}
+
+$n3 = 3*($#atomx+1);
+$nqpts = $#qptx+1;
+
+#
+# Mass-scale the eigenvectors to get cartesian displacements
+#
+#@imass=(1,1,1,1,1,1);
+eigvec_scale(\@eigvecs,\@imass);
+#
+# Find a Gamma-point (q=0) in the .phonon output if none specified
+#
+if ($qpoint < 0 ) {
+  $nqz=-1;
+  for $iq (0..$#qptx) {
+    if (fabs($qptx[$iq]) < 1.0e-3 && fabs($qpty[$iq]) < 1.0e-3 
+	&& fabs($qptz[$iq]) < 1.0e-3) {
+      $nqz = $iq;
+      last;
+    }
+  }
+  die "Failed to locate q=0 phonon eigenvectors" unless $nqz >= 0;
+  $qpoint = $nqz;
+} elsif ( $qpoint-1 > $#qptx) {
+  die "Qpoint # ",$qpoint," not found in file"
+} elsif ($supercell_arg) {
+  @qvec = ($qptx[$qpoint],$qpty[$qpoint],$qptz[$qpoint]);
+  @qvec_super = &matmul_mv(\@supercell, \@qvec);
+
+  foreach $i (0..2) {
+    die "Q-vector not commensurate with supercell" if (not is_integer($qvec_super[$i]));
+  }
+} else {
+  $make_supercell++;
+  @qvec = ($qptx[$qpoint],$qpty[$qpoint],$qptz[$qpoint]);
+
+  for $q (@qvec) {
+    $q = 1.0 if (fabs($q) < 1e-3 );
+  }
+
+  print STDERR "Q[$qpoint] = ($qvec[0] $qvec[1] $qvec[2] )\n" if $verbose;
+
+  @supercell = (1/$qvec[0], 0, 0, 0, 1/$qvec[1], 0, 0, 0, 1/$qvec[2]);
+
+  print STDERR "Generating supercell ($supercell[0] $supercell[1] $supercell[2] $supercell[3] $supercell[4] $supercell[5] $supercell[6] $supercell[7] $supercell[8] )\n" if $verbose;
+  @qvec_super = &matmul_mv(\@supercell, \@qvec);
+  print STDERR "Q(supercell) = ($qvec_super[0] $qvec_super[1] $qvec_super[2] )\n" if $verbose;
+
+}
+#
+# Add any offset
+#
+if( $renorm > 0 ) {
+  for $ion (0..$#atomx) {
+    $atomx[$ion] += $offset[0];
+    $atomy[$ion] += $offset[1];
+    $atomz[$ion] += $offset[2];
+    $atomx[$ion] -= floor( $atomx[$ion]	);
+    $atomy[$ion] -= floor( $atomy[$ion]	);
+    $atomz[$ion] -= floor( $atomz[$ion]	);
+  }
+}
+#
+# Rotate unit cell for XYZ output (Jmol)
+#
+my ($aa, $bb, $cc, $ag, $bg, $cg) = MATtoABC(\@a, \@b, \@c);
+&ABCtoMATrotaxis($aa,$bb,$cc,$ag,$bg,$cg, \@ar, \@br, \@cr);
+
+#
+# Make Supercell if necessary
+#
+@shiftlist = SuperCell (\@atomx, \@atomy, \@atomz, \@atyi, \@supercell);
+Expand(\@atomx, \@atomy, \@atomz, \@atyi, \@shiftlist,
+       \@atomxe, \@atomye, \@atomze, \@atyie);
+
+#
+# Write jmol script
+#
+if( $jmol_out ) {
+  if( $make_supercell ) {
+    $JMolCommand = sprintf "jmolscript: load \"\" {1 1 1} PACKED unitcell {%f %f %f %f %f %f}", $aa*$supercell[0], $bb*$supercell[4], $cc*$supercell[8], $ag, $bg, $cg;
+
+
+  } else {
+    $JMolCommand = sprintf "jmolscript: load \"\" {1 1 1} PACKED unitcell {%f %f %f %f %f %f}", $aa, $bb, $cc, $ag, $bg, $cg;
+  }
+}
+#
+# Write own output file if jmol selected
+#
+if ($jmol_out) {
+  my $filename = $ARGV[0];
+
+  $filename =~s/.phonon//;
+  $filename = $filename.".xyz";
+
+  open STDOUT, ">$filename" or die "Failed to open $filename for writing";
+}
+#
+#
+# Now compute ion perturbation for each mode and write
+#
+for $mode (0..$#{$freq[0]} ) {
+  for $ion (0..$#atomx) {
+    $pertxr[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][0];
+    $pertyr[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][2];
+    $pertzr[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][4];
+    $pertxi[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][1];
+    $pertyi[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][3];
+    $pertzi[$ion] = $amplitude*$eigvecs[$qpoint][$mode][$ion][5];
+    print STDERR "Perturbation vector for ion $ion:  ($pertxr[$ion],$pertxi[$ion]) ,($pertyr[$ion],$pertyi[$ion]), ($pertzr[$ion],$pertzi[$ion])\n" if $verbose;
+  }
+
+  $modestr = sprintf "Mode %3d, %8.2f 1/cm", $mode+1, $freq[$qpoint][$mode];
+  $modestr .= " ".$JMolCommand if( $jmol_out && $mode==0);
+
+  if( $make_supercell ) {
+    ExpandPerturbation($qvec[0],$qvec[1],$qvec[2],\@pertxr, \@pertyr, \@pertzr, 
+  		      \@pertxi, \@pertyi, \@pertzi, \@shiftlist, \@pertxe, \@pertye, \@pertze);
+
+    #
+    # Convert eigenvectors to fractional co-ordinates
+    # Note use of *original*, unrotated cell vectors for this purpose.
+    #
+    CartToFrac(\@a, \@b, \@c , \@pertxe, \@pertye, \@pertze,  \@pertar, \@pertbr, \@pertcr);
+
+    WriteXYZPhon(\@ar, \@br, \@cr, \@atomxe, \@atomye, \@atomze, \@atyie, $modestr,\@pertar, \@pertbr, \@pertcr);
+
+  } else {
+    #
+    # Convert eigenvectors to fractional co-ordinates
+    # Note use of *original*, unrotated cell vectors for this purpose.
+    #
+    CartToFrac(\@a, \@b, \@c , \@pertxr, \@pertyr, \@pertzr,  \@pertar, \@pertbr, \@pertcr);
+
+    WriteXYZPhon(\@ar, \@br, \@cr, \@atomx, \@atomy, \@atomz, \@atyi, $modestr,\@pertar, \@pertbr, \@pertcr);
+  }
+}
+
+sub eigvec_scale {
+  my ($eigvecs, $mass) = @_;
+  my ($eigvec, $mode, $ion, $nion, $xyz, $i, $irtmass);
+
+  for $eigvec (@$eigvecs) {
+    for $mode (@$eigvec) {
+      $nion = 0;
+      for $ion (@$mode) {
+	if( @$mass[$nion] > 0 ) {
+	  $irtmass = 1.0/sqrt(@$mass[$nion]);
+	  for $i (@$ion) {
+	    $i *= $irtmass;
+	  }
+	}
+	$nion++;
+      }
+    }
+  }
+}
+
+sub matmul_mv {
+  my ($m, $v) = @_;
+
+  my (@v1, $i, $j);
+
+  for $i (0..2) {
+    $v1[$i] = 0.0;
+    for $j (0..2) {
+      $v1[$i] += $$m[$i*3+$j]*$$v[$j];
+    }
+  }
+
+  return @v1;
+}
+
+sub WriteJmolScript {
+  my ($filename, $a, $b, $c, $aa, $ba, $ca) = @_;
+
+  $filename =~s/.phonon//;
+  $filename = $filename.".spt";
+
+  open JMOLOUT, ">$filename" or die "Failed to open $filename for writing";
+
+  $filename =~s/.spt/.xyz/;
+
+  printf JMOLOUT "load \"%s\" {1 1 1} unitcell {%f %f %f %f %f %f}\n",$filename, $a, $b, $c, $aa, $ba, $ca;
+ 
+  close JMOLOUT;
+}

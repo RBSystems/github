@@ -1,0 +1,62 @@
+#Description of run.
+description="ZrH2"
+
+calculation_mode="Relax Structure"
+
+# Units for bravais_lattice_type and atoms
+crds_units="Angstrom"
+#"Angstrom"
+
+#atomic_coordinate_type="Cell Relative"
+atomic_coordinate_type="Absolute"
+
+# Lattice constants 
+a_length="3.52"
+b_length="3.52"
+c_length="4.449"
+
+# Wavefunction grid
+wavefunction_grid="20 20 24"
+kpoint_mesh="5 5 5"
+
+relax_max_force = "0.00001"
+rms_convergence_criterion="1.0e-9"
+
+# electrons
+occupations_type="Fixed"  
+unoccupied_states_per_kpoint="10"
+
+######## carefully modify following lines #####
+
+use_symmetry="true"
+
+#start_mode="LCAO Start"
+start_mode="LCAO Start"
+
+max_md_steps="100"
+max_scf_steps="200"
+
+
+charge_mixing_type="Pulay"
+charge_pulay_order="5"
+charge_pulay_scale="0.5"
+
+# Subspace diagonalization options
+#initial_diagonalization = "true"
+subdiag_driver="scalapack"
+
+# Potential acceleration options
+# By default poisson is set to zero but it may work better for some systems
+# Setting it to 1.0 is a good option.
+potential_acceleration_constant_step="0.0"
+potential_acceleration_poisson_step="0.0"
+
+kohn_sham_mucycles = "3"
+
+bravais_lattice_type="Orthorhombic Primitive"
+
+# List  atomic symbol, coordinates, and movable flag (1 == movable) 
+# symbol and coordinates are required, moveable is optional, default is 1
+atoms =
+"
+"

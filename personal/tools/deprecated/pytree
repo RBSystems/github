@@ -1,0 +1,51 @@
+#!/usr/bin/python3
+#coding=utf-8
+
+'''
+TODO:
+    ignore hidden file
+    use os.walk()
+    define depth to make it looks better
+    ├
+'''
+ 
+import os
+import sys
+import glob
+
+def WalkTree(CurrentPath):
+    files = os.walk(CurrentPath)
+
+def prefix(count):
+    return (' '*4*count + '├── ')
+
+# print files first
+def TravelTree(CurrentPath, count):
+    if not os.path.exists(CurrentPath):
+        print ("Dir does not exist. Stop.\n")
+        sys.exit(1)
+
+    files = glob.glob('%s/*'% CurrentPath)
+
+    for _file in files:
+        if os.path.isfile(_file):
+            filename = os.path.basename(_file)
+            print ('|   '*count + tree + filename)
+
+    for _dir in files:
+        if os.path.isdir(_dir):
+            print ('\033[1;31;40m'),
+            print ("|   "* count + tree + _dir),
+            print ('\033[0m')
+            TravelTree(_dir, count+1)
+
+
+if __name__=="__main__":
+
+    try:
+        cwd = sys.argv[1]
+    except:
+        cwd = os.getcwd()
+    print ('%s'% cwd)
+    tree = u'├── '
+    TravelTree(cwd, 0)

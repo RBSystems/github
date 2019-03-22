@@ -1,0 +1,12 @@
+Currently Loaded Modulefiles:
+  1) gcc/5.3.0        3) xalt/0.7.5
+  2) openmpi/1.10.3   4) PE-gnu/1.0
+Thu Mar  1 23:50:33 EST 2018
+[or-condo-c253:161123] *** Process received signal ***
+[or-condo-c253:161123] Signal: Segmentation fault (11)
+[or-condo-c253:161123] Signal code:  (128)
+[or-condo-c253:161123] Failing at address: (nil)
+[or-condo-c253:161128] *** Process received signal ***
+[or-condo-c253:161128] Signal: Segmentation fault (11)
+[or-condo-c253:161128] Signal code:  (128)
+[or-condo-c253:161128] Failing at address: (nil)

@@ -1,0 +1,6 @@
+create labels for rmg input, thus it will be better to create supercells
+i.e., atoms can be read and replaced directly
+
+generate input files for rmg/vasp automatically from cif files
+
+testadad

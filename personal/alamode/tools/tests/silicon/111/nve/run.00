@@ -1,0 +1,121 @@
+#! /bin/bash
+
+Computer name: Cades
+
+********************************************************************************
+*                              PBS LINES:     30                               *
+********************************************************************************
+
+--------------------------------------------------------------------------------
+#! /bin/bash
+
+#PBS -A sns
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l qos=long
+#PBS -W group_list=cades-virtues
+#PBS -l walltime=300:00:00
+#PBS -l nodes=2:ppn=32
+#PBS -N si.nve-5000@/home/z8j/github-ncsu/personal/alm/tools/tests/silicon/111/nve
+
+module load PE-gnu
+module list
+
+export OMP_NUM_THREADS=1
+
+cd /home/z8j/github-ncsu/personal/alm/tools/tests/silicon/111/nve/
+
+date
+
+mpirun -np 64 --bind-to core --map-by ppr:32:node:pe=1 /home/z8j/bin/rmg-cpu md.in > md.00.out
+
+date
+
+if [ ! `grep WARNING oe.$PBS_JOBID OUTCAR` = '' ]; then
+  grep WARNING oe.$PBS_JOBID OUTCAR >> WARNING
+fi
+--------------------------------------------------------------------------------
+
+********************************************************************************
+*                             INPUT LINES:     73                              *
+********************************************************************************
+
+--------------------------------------------------------------------------------
+
+################################
+# Input info for RMG:
+#     Species: ['Si']
+#     Number of species: 1
+#     Number of ions: 8
+################################
+
+
+
+
+wavefunction_grid="32 32 32"
+
+kpoint_mesh="3 3 3"
+
+a_length="10.357500000000"
+
+b_length="10.357500000000"
+
+c_length="10.357500000000"
+
+crds_units="Bohr"
+
+length_units="Bohr"
+
+atomic_coordinate_type="Cell Relative"
+
+#unoccupied_states_per_kpoint="30"
+
+description="Silicon" 
+
+occupations_type="Fixed" 
+
+calculation_mode="Constant Volume And Energy"
+#md_temperature_control="Anderson Rescaling"
+md_temperature="300"
+#occupation_electron_temperature_eV = "0.05"
+
+start_mode="LCAO Start" 
+
+max_md_steps="5000" 
+
+max_scf_steps="100" 
+
+relax_max_force = "0.0001" 
+
+rms_convergence_criterion="1.0e-7" 
+
+charge_density_mixing="0.5" 
+
+charge_mixing_type="Linear" 
+
+subdiag_driver="scalapack" 
+
+potential_acceleration_constant_step="1.0" 
+
+potential_acceleration_poisson_step="0.0" 
+
+#kohn_sham_mucycles = "3" 
+
+bravais_lattice_type="Cubic Primitive" 
+
+atoms=
+"
+Si  0.1249709013505753  0.1250219424114013  0.1250931224955827   1
+Si  0.1250638926065565  0.6250434449363297  0.6250634844259227   1
+Si  0.6249799979579430  0.1250636827277944  0.6250744609192410   1
+Si  0.6250470914609149  0.6250162273710861  0.1250867125523586   1
+Si  0.3750840100935667  0.3750208268328204  0.3750500853992057   1
+Si  0.3749065717532362  0.8750341674688741  0.8750101856161999   1
+Si  0.8749290114498302  0.3750683146718008  0.8750171385927524   1
+Si  0.8749017485198760  0.8750184232873827  0.3750026887051665   1
+"
+--------------------------------------------------------------------------------
+

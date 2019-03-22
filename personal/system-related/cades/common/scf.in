@@ -1,0 +1,51 @@
+ &control
+    calculation = 'scf',
+    wf_collect = .true.
+    verbosity='high'
+    nstep = 300,
+    tstress = .true.
+    tprnfor = .true.
+    etot_conv_thr = 1.0d-8,
+    forc_conv_thr = 1.0d-4,
+    restart_mode = 'from_scratch',
+    prefix = 'ZrH2',
+    outdir = 'output_dir',
+    pseudo_dir = '/home/z8j/svn_personal/qe/pp'
+ /
+ &system
+    ibrav = 0,
+    ntyp = 2,
+    nat = 6,
+    occupations = "smearing",
+    smearing = "mp",
+    degauss = 0.01,
+    ecutwfc = 80,
+    ecutrho = 800
+ /
+ &electrons
+    mixing_beta = 0.7,
+    conv_thr = 1.d-10,
+    diagonalization = "david",
+    electron_maxstep = 1000,
+    startingwfc = 'atomic+random'
+ /
+
+ATOMIC_SPECIES
+ Zr  91.224  Zr.pbe-nsp-van.UPF
+ H  1.000 H.pbe-rrkjus.UPF
+
+CELL_PARAMETERS angstrom
+ 3.5200 0.0000 0.0000
+ 0.0000 3.5200 0.0000
+ 0.0000 0.0000 4.4490
+
+K_POINTS automatic
+ 16 16 16 0 0 0
+
+ATOMIC_POSITIONS angstrom
+ Zr   0.000000000         0.000000000         0.000000000
+ Zr   1.759999990         1.759999990         2.224499941
+ H   0.000000000         1.759999990         1.112249970
+ H   1.759999990         0.000000000         1.112249970
+ H   1.759999990         0.000000000         3.336749911
+ H   0.000000000         1.759999990         3.336749911

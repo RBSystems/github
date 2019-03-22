@@ -1,0 +1,405 @@
+#!/usr/bin/env python
+
+'''
+Program: generate and submit pbs files for RMG
+         save rmg.in/supercell.in for later debug
+    zjyx, @2017/02, ORNL
+
+ChangeLogs:
+    1. remove queue tags, which will be determined by walltime and host
+        automatically.
+    2. use class to definie params for their protections
+
+TODO:
+    use set and get method for pbs class
+    use unchangeable class for param_prop--prohibit possible mischange
+'''
+
+import os
+import sys
+
+# params properties
+param_prop = { 
+    'nodes': {'type': int, 'required': True, 'default': None},
+    'time' : {'type': list, '_type': int, 'required': True, 'default': None},
+    'exeinput': {'type': str, 'required': True, 'default': None},
+    'exepath': {'type': str, 'required': True, 'default': None},
+    'threads': {'type': int, 'required': False, 'default': 1},
+    'name': {'type': str, 'required': False, 'default': 'test'},
+    'queue': {'type': str, 'required': False, 'default': 'debug'},
+    'is_submit': {'type': bool, 'required': False, 'default': True}
+    }
+
+class Param:
+    def __init__(self,
+                init_reqd=None,
+                init_type=None,
+                init_dft=None):
+        self._required = init_reqd
+        self._type = init_type
+        self._default = init_dft
+
+    def set_required(self, required):
+        self._required = required
+
+    def get_required(self):
+        return self._required
+
+    def _set_type(self, type_):
+        self._type = type_
+
+    def get_type(self):
+        return self._type
+
+    def _set_default(self, default):
+        self._default = default
+
+    def get_default(self):
+        return self._default
+'''
+# considering conertion of variables, this may not be very good
+nodes = Param(init_reqd=True, init_type=int, init_dft=None)
+time  = Param(init_reqd=True, init_type=[list, int], init_dft=None)
+exeinput = Param(init_reqd=True, init_type=str, init_dft='rmg.in')
+exeinpath = Param(init_reqd=True, init_type=str, init_dft=None)
+name = Param(init_reqd=False, init_type=str, init_dft='test')
+threads = Param(init_reqd=False, init_type=int, init_dft=1)
+queue = Param(init_reqd=False, init_type=str, init_dft='debug')
+is_submit = Param(init_reqd=False, init_type=bool, init_dft=True)
+'''
+
+class InitEnv:
+    def __init__(self):
+        self._user = None
+        self._host = None
+        self._pwd  = None
+        self._home_path = None
+
+        self._set_all()
+
+    def _set_all(self):
+        self._set_user()
+        self._set_host()
+        self._set_pwd()
+        self._set_home_path()
+
+    def _set_user(self):
+        import getpass
+        self._user = getpass.getuser()
+
+    def get_user(self):
+        return self._user
+
+    def _set_host(self):
+        import socket
+        hostname = socket.gethostname()
+        if 'or-condo' in hostname:
+            self._host = 'Cades'
+        elif 'h2o' in hostname:
+            self._host = 'BlueWaters'
+        elif 'titan' in hostname:
+            self._host = 'Titan'
+        else:
+            print 'Unknow host, exit.\n'
+
+    def get_host(self):
+        return self._host
+
+    def _set_pwd(self):
+        self._pwd = os.getcwd()
+
+    def get_pwd(self):
+        return self._pwd
+
+    def _set_home_path(self):
+        self._home_path = os.path.expanduser('~')
+
+    def get_home_path(self):
+        return self._home_path
+
+# add set and get functions here, cause it may be modified
+class ConfParser:
+    def __init__(self, filename=None):
+        self._confs = { 'nodes':    param_prop['nodes']['default'],
+                        'time':     param_prop['time']['default'],
+                        'exeinput': param_prop['exeinput']['default'],
+                        'exepath':  param_prop['exepath']['default']
+        }
+
+        self._params = {}
+
+        if filename is not None:
+            self.read_file(filename)
+
+        self.parse_conf()
+
+    def setting_error(self, msg):
+        print(msg)
+        print("Please check the setting tags.")
+        sys.exit(1)
+
+    def read_file(self, filename):
+        confs = self._confs
+        with open(filename, 'rb') as f:
+            lines_conf = f.readlines()
+        for line in lines_conf:
+            line_tmp = line.split('#')[0]
+            if line_tmp == '':
+                continue
+            if line_tmp.find('=') != -1:
+                left, right = [x.strip().lower() for x in line_tmp.split('=')]
+                confs[left] = right
+
+    def parse_conf(self):
+        confs = self._confs
+
+        for conf_key in confs.keys():
+            if conf_key == 'nodes':
+                self.set_param('nodes', confs['nodes'])
+            elif conf_key == 'time':
+                self.set_param('time', confs['time'])
+            elif conf_key == 'exeinput':
+                self.set_param('exeinput', confs['exeinput'])
+            elif conf_key == 'exepath':
+                self.set_param('exepath', confs['exepath'])
+            elif conf_key == 'threads':
+                self.set_param('threads', confs['threads'])
+            elif conf_key == 'name':
+                self.set_param('name', confs['name'])
+            elif conf_key == 'is_submit':
+                self.set_param('is_submit', confs['is_submit'])
+            elif conf_key == 'queue':
+                self.set_param('queue', confs['queue'])
+            else:
+                print("Warning! Unrecoginized settings: %s"% conf_key)
+
+    def set_param(self, key, val):
+        _param = param_prop[key]
+        if _param['required'] and val == _param['default']:
+            msg = "Error: required tags %s not found."% key
+            self.setting_error(msg)
+
+        if _param['type'] == str:
+            self._params[key] = val
+        elif _param['type'] == int:
+            self._params[key] = int(val)
+        elif _param['type'] == float:
+            self._params[key] = float(val)
+        elif _param['type'] == bool:
+            if val.lower() == 'false':
+                self._params[key] = False
+            elif val.lower() == 'true':
+                self._params[key] = True
+        elif _param['type'] == list:
+            _type = _param['_type']
+            self._params[key] = [_type(x) for x in val.split()]
+
+# check if settings make sense, and correct them
+def validate_params(pbs_conf, init_env):
+    threads = pbs_conf._params['threads']
+    exeinput = pbs_conf._params['exeinput']
+    queue = pbs_conf._params['queue']
+    time = pbs_conf._params['time']
+    name = pbs_conf._params['name']
+
+    name += '@' + init_env.get_pwd()
+
+    if 32%(threads):
+        print "OMP_NUM_THREADS error, exit.\n"
+        sys.exit(1)
+    
+    if not os.path.isfile(exeinput):
+        print "RMG input file(%s) not found, exit.\n"% exeinput
+        sys.exit(1)
+    
+    if init_env.get_host() == 'BlueWaters':
+        all_queues = ['debug', 'normal', 'high']
+        if queue != 'none' and queue not in all_queues:
+            print 'Queue error, exit.\n'
+            sys.exit(1)
+        # ignore if queue is high
+        if queue != 'high':
+            if time[0]*60+time[1] <= 30:
+                queue = all_queues[0]
+                print "Walltime <= 30 mins, queue will be %s.\n"% queue
+            else:
+                queue = all_queues[1]
+                print "Walltime > 30 mins, queue will be %s.\n"% queue
+        #if queue == 'normal' and (time[0]*60+time[1]<30):
+        #    print "Walltime is smaller than 30 mins, resetting 'queue' to 'debug'3.\n"
+        #    queue = 'debug'
+        #if queue == 'debug' and (time[0]*60+time[1]>30):
+        #    print 'Walltime for debug error, resetting to 30 mins.\n'
+        #    time = [0, 30]
+    elif init_env.get_host() == 'Cades':
+        all_queues = ['batch', 'long']
+        if queue != 'none' and queue not in all_queues:
+            print 'Queue error, exit.\n'
+            sys.exit(1)
+        if time[0] > 48:
+            queue = all_queues[1]
+            print "Walltime > 48 hrs, queue will be %s.\n"% queue
+        else:
+            queue = all_queues[0]
+            print "Walltime <= 48 hrs, queue will be %s.\n"% queue
+
+    # consider use set and get method here
+    pbs_conf._params['threads']= threads    
+    pbs_conf._params['exeinput']  = exeinput  
+    pbs_conf._params['queue']  = queue      
+    pbs_conf._params['time']   = time       
+    pbs_conf._params['name']   = name       
+
+def write_pbs(init_env, pbs_conf):
+    threads = pbs_conf._params['threads']
+    nodes = pbs_conf._params['nodes']
+    time = pbs_conf._params['time']
+    name = pbs_conf._params['name']
+    queue = pbs_conf._params['queue']
+    exepath = pbs_conf._params['exepath']
+    exeinput = pbs_conf._params['exeinput']
+
+    pwd = init_env.get_pwd()
+    ppn_use     = divmod(32, threads)[0]
+    cores       = int(nodes*32/threads)
+    time_pbs    = "%02d:%02d:00"%(time[0], time[1])
+    
+    pbs_dict = {'queue':        queue,
+                'time':         time_pbs,
+                'nodes':        nodes,
+                'name':         name,
+                'threads':      threads,
+                'pwd':          pwd,
+                'cores':        cores,
+                'exepath':      exepath,
+                'exeinput':     exeinput,
+                'ppn_use':      ppn_use}
+
+    if init_env.get_host() == "Cades":
+        lines_pbs = ""
+        lines_pbs += "#!/bin/bash\n"
+        lines_pbs += "\n"
+        lines_pbs += "#PBS -A sns\n"
+        lines_pbs += "#PBS -q %(queue)s\n"% pbs_dict
+        lines_pbs += "#PBS -m ea\n"
+        lines_pbs += "#PBS -M zjyx1991@foxmail.com\n"
+        lines_pbs += "#PBS -j oe\n"
+        lines_pbs += "#PBS -l qos=condo\n"
+        lines_pbs += "#PBS -W group_list=cades-virtues\n"
+        lines_pbs += "#PBS -l walltime=%(time)s\n" % pbs_dict
+        lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32\n"% pbs_dict
+        lines_pbs += "#PBS -N %(name)s\n" % pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "module load PE-gnu\n"
+        lines_pbs += "module list\n"
+        lines_pbs += "\n"
+        lines_pbs += "export OMP_NUM_THREADS=%(threads)d\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "cd %(pwd)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "date\n"
+        lines_pbs += "\n"
+        lines_pbs += "mpirun -np %(cores)d --bind-to none --map-by ppr:%(ppn_use)d:node:pe=%(threads)d %(exepath)s %(exeinput)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "date\n"
+
+    elif init_env.get_host() == "BlueWaters":
+        lines_pbs = ""
+        lines_pbs += "#!/bin/bash\n"
+        lines_pbs += "\n"
+        lines_pbs += "#PBS -A baec\n"
+        lines_pbs += "#PBS -q %(queue)s\n"% pbs_dict
+        lines_pbs += "#PBS -m ea\n"
+        lines_pbs += "#PBS -M zjyx1991@foxmail.com\n"
+        lines_pbs += "#PBS -j oe\n"
+        lines_pbs += "#PBS -l walltime=%(time)s\n"% pbs_dict
+        lines_pbs += "#PBS -l nodes=%(nodes)d:ppn=32:xe\n"% pbs_dict
+        lines_pbs += "#PBS -N %(name)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "source /opt/modules/default/init/bash\n"
+        lines_pbs += "module swap PrgEnv-cray PrgEnv-gnu\n"
+        lines_pbs += "module list\n"
+        lines_pbs += "\n"
+        lines_pbs += "export OMP_NUM_THREADS=%(threads)d\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "export MPICH_MAX_THREAD_SAFETY=serialized\n"
+        lines_pbs += "export OMP_WAIT_POLICY=passive\n"
+        lines_pbs += "export MPICH_ENV_DISPLAY=1\n"
+        lines_pbs += "export MPICH_ALLREDUCE_NO_SMP=1\n"
+        lines_pbs += "ulimit -a\n"
+        lines_pbs += "export CRAY_CUDA_PROXY=1\n"
+        lines_pbs += "export MPICH_UNEX_BUFFER_SIZE=362914560\n"
+        lines_pbs += "export MPICH_MAX_SHORT_MSG_SIZE=3200\n"
+        lines_pbs += "\n"
+        lines_pbs += "cd %(pwd)s\n"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "date\n"
+        lines_pbs += "\n"
+        lines_pbs += "aprun -n %(cores)d -N %(ppn_use)d -d %(threads)d -cc numa_node %(exepath)s %(exeinput)s"% pbs_dict
+        lines_pbs += "\n"
+        lines_pbs += "date\n"
+
+    with open('pbs.rmg', 'wb') as f:
+        f.write(lines_pbs)
+
+def PBSRun(init_env, pbs_conf):
+
+    # submit pbs
+    if pbs_conf._params['is_submit']:
+        print "Submitting jobs...\n"
+        os.system('qsub pbs.rmg')
+    
+    
+    with open('pbs.rmg', 'rb') as f:
+        lines_pbs = f.readlines()
+    
+    with open('%s'% pbs_conf._params['exeinput'], 'rb') as f:
+        lines_in = f.readlines()
+    
+    lines_conf = ''
+    lines_conf += '#! /bin/bash'+'\n\n'
+    lines_conf += 'Computer name: %s'%init_env.get_host() + '\n\n'
+    lines_conf += '*'*80+'\n'
+    lines_conf += '*'+' '*30+'PBS LINES: %6d'%len(lines_pbs)+' '*31+'*\n'
+    lines_conf += '*'*80+'\n\n'
+    lines_conf += '-'*80+'\n'
+    lines_conf += ''.join(lines_pbs)
+    lines_conf += '-'*80+'\n\n'
+    lines_conf += '*'*80+'\n'
+    lines_conf += '*'+' '*29+'INPUT LINES: %6d'%(len(lines_in))+' '*30+'*\n'
+    lines_conf += '*'*80+'\n\n'
+    lines_conf += '-'*80+'\n'
+    lines_conf += ''.join(lines_in)
+    lines_conf += '-'*80+'\n\n'
+    
+    # save configurations: including input file and pbs file
+    i = 0
+    while os.path.isfile('runconf.%02d'%(i)):
+        i += 1
+    
+    with open('runconf.%02d'% i, 'wb') as f:
+        f.write(lines_conf)
+
+
+if __name__ == "__main__":
+
+    print '\n'
+
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        filename = 'pbs.conf'
+
+    if not os.path.isfile(filename):
+        print("PBS conf file not found, exit.")
+        sys.exit(1)
+
+    init_env = InitEnv()
+    pbs_conf = ConfParser(filename)
+    # print pbs_conf._params
+    validate_params(pbs_conf, init_env)
+    #print pbs_conf._params
+
+    write_pbs(init_env, pbs_conf)
+
+    PBSRun(init_env, pbs_conf)

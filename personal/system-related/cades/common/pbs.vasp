@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#PBS -q batch
+#PBS -j oe
+#PBS -A sns
+#PBS -l qos=condo
+#PBS -W group_list=cades-virtues
+#############################
+
+#PBS -l walltime=02:29:00
+#PBS -l nodes=4:ppn=32
+########################
+#PBS -N vasp.test
+
+#module load linux-x86_64/openmpi@1.10.2%gcc@4.8.5~psm~tm+verbs-a5vm5ga
+module load compilers/intel/2016.1
+module load mpi/openmpi/intel/1.10.2
+module load utils/intel/mkl/2016.1
+module list
+
+export OMP_NUM_THREADS=1
+#VASP=/software/user_tools/current/cades-virtues/apps/vasp/intel/5.4.1/bin/vasp_std
+VASP=/software/user_tools/current/cades-virtues/apps/vasp/intel/5.4.1/cades_opt/vasp_std
+
+
+cd $PBS_O_WORKDIR
+
+date
+
+#mpirun -np 128 --bind-to none --map-by ppr:8:node:pe=4 ~/public/rmg-cpu rmg.in
+mpirun -np 128 $VASP
+
+date

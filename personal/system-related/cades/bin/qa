@@ -1,0 +1,59 @@
+#!/bin/bash
+
+user=z8j
+all_users=z8j,yyc,far,x5s,l8d,scu,fup,f7l,ntm,svh,stuartcampbell,jbq,vdp,cladekb
+lastline=`qstat -u ${all_users} | wc -l`
+
+
+jobs_info=`showq | grep 'active jobs \|eligible jobs \|blocked jobs '`
+active_jobs=`echo $jobs_info | awk '{printf $1}'`
+eligible_jobs=`echo $jobs_info | awk '{printf $14}'`
+blocked_jobs=`echo $jobs_info | awk '{printf $17}'`
+usage_pct=`echo $jobs_info | awk '{printf $13}'`
+usage_det=`echo $jobs_info | awk '{printf "%s/%s", $4, $6}'`
+#usage_det=`echo $jobs_info | awk '{printf "%s in use out of %s", $4, $6}'`
+#active_jobs=`showq -r| grep "active jobs  " | awk '{printf $1}'`
+#in_use=`showq -r | grep "nodes active" | awk '{printf $1}'`
+#total=`showq -r | grep "nodes active" | awk '{printf $3}'`
+#usage=`showq -r | grep "nodes active" | awk '{printf "%s %s %s %s %s %s", $6, $1, $2, $3, $4, $5}'`
+#eligible_jobs=`showq -i| grep "eligible jobs  " | awk '{printf $1}'`
+#blocked_jobs=`showq -b| grep "blocked jobs  " | awk '{printf $1}'`
+
+qstat -u ${all_users}
+qstat -u ${all_users} | awk -v lastline="$lastline" -v user="$user" -v active="$active_jobs" -v elig="$eligible_jobs" -v block="$blocked_jobs" -v usage_pct="$usage_pct" -v usage_det="$usage_det" '
+    (NR>5 && $10=="R"){
+         all_R_jobs=all_R_jobs+1;
+         all_R_nodes=all_R_nodes+$6;
+         all_R_cores=all_R_cores+$7;
+         if ($2==user){
+            user_R_jobs=user_R_jobs+1;
+            user_R_nodes=user_R_nodes+$6;
+            user_R_cores=user_R_cores+$7;}
+    }
+    (NR>5 && $10=="Q"){
+         all_Q_jobs=all_Q_jobs+1;
+         all_Q_nodes=all_Q_nodes+$6;
+         all_Q_cores=all_Q_cores+$7;
+         if ($2==user){
+            user_Q_jobs=user_Q_jobs+1;
+            user_Q_nodes=user_Q_nodes+$6;
+            user_Q_cores=user_Q_cores+$7;}
+    }
+    NR==lastline{
+         printf"\n=================================================================================================================\n";
+         printf"                                                    Summary";
+         printf"\n=================================================================================================================\n";
+         printf"---------------------------------------------------------------------\n";
+         printf"|   USER   |      %6s      |      Others      |        All       |               SYSTEM INFO\n", user;
+         printf"---------------------------------------------------------------------\n";
+         printf"|   STATUS | Running | Queued | Running | Queued | Running | Queued |       Active jobs  : %22d\n", active;
+         printf"---------------------------------------------------------------------       Eligible jobs: %22d\n", elig;
+         printf"|   JOBS   | %7d | %6d | %7d | %6d | %7d | %6d |       Blocked jobs : %22d\n", user_R_jobs, user_Q_jobs, (all_R_jobs-user_R_jobs), (all_Q_jobs-user_Q_jobs), all_R_jobs, all_Q_jobs, block;
+         printf"---------------------------------------------------------------------       Cores usage  : %14s%s\n", usage_det, usage_pct;
+         printf"|   NODES  | %7d | %6d | %7d | %6d | %7d | %6d |\n", user_R_nodes, user_Q_nodes, (all_R_nodes-user_R_nodes), (all_Q_nodes-user_Q_nodes), all_R_nodes, all_Q_nodes;
+         printf"---------------------------------------------------------------------\n";
+         printf"|   CORES  | %7d | %6d | %7d | %6d | %7d | %6d |\n", user_R_cores, user_Q_cores, (all_R_cores-user_R_cores), (all_Q_cores-user_Q_cores), all_R_cores, all_Q_cores;
+         printf"---------------------------------------------------------------------\n"
+    }'
+#qstat -u z8j,yyc | awk 'NR>5{printf"%10d\n",$7}
+

@@ -1,0 +1,15 @@
+set(CMAKE_FIND_ROOT_PATH 
+/software/user_tools/current/cades-virtues/apps/fftw/gcc5/3.3.4/
+/software/tools/spack/opt/spack/linux-x86_64/gcc-4.8.5/openblas-0.2.15-f74b2gb6oq6bdcwpewkbbgake2rbe25z
+/home/z8j/softwares/pfft
+/home/z8j/softwares/spglib-1.9.5
+/home/z8j/softwares/libxc-2.2.3
+/home/z8j/softwares/bzip2-1.0.6
+#/software/dev_tools/swtree/cs400_centos7.2_pe2016-08/magma/1.7.0/centos7.2_gnu4.9.4/
+/home/z8j/softwares/scalapack-2.0.2/build
+#/home/z8j/softwares/openbabel-2.4.1/build
+#/home/z8j/softwares/BLAS-3.6.0
+#/home/z8j/softwares/BLACS-MPI
+#/home/z8j/softwares/lapack-3.6.1/build
+#/home/z8j/softwares/OpenBLAS-0.2.19/build
+)

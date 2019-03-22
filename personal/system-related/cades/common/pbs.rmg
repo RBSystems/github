@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#PBS -q batch
+#PBS -j oe
+#PBS -A sns
+#PBS -l qos=condo
+#PBS -W group_list=cades-virtues
+#PBS -m ea
+#PBS -M zjyx1991@foxmail.com
+#############################
+
+#PBS -l walltime=45:30:00
+#PBS -l nodes=12:ppn=32
+########################
+#PBS -N nh4clo4.relax
+
+module load PE-gnu
+module list
+
+export OMP_NUM_THREADS=1
+##export OMP_NUM_THREADS=2
+
+
+cd $PBS_O_WORKDIR
+
+date
+
+mpirun -np 128 --bind-to none --map-by ppr:8:node:pe=4 ~/public/rmg-cpu rmg.in
+mpirun -np 384 ~/bin/rmg-cpu rmg.in
+
+date

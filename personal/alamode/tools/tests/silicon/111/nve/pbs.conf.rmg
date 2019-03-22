@@ -1,0 +1,17 @@
+# conf for pbs submit
+# NOTE: module need to be added one per line, and need to be in absolute path
+# 
+
+# mandatory
+NODES       = 2
+TIME        = 300 00 # in units of hrs, mins
+EXEINPUT    = md.in
+EXEPATH     = /home/z8j/bin/rmg-cpu
+THREADS     = 1
+account = sns
+
+# optional
+NAME        = si.nve-5000
+IS_SUBMIT   = true
+QUEUE       = auto
+MODULE      = PE-gnu

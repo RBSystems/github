@@ -1,0 +1,48 @@
+#!/usr/bin/env perl
+
+#    Copyright (c) Keith Refson 1998-2012
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use Cwd 'abs_path';
+BEGIN {$mypath = $0;
+       $mypath = abs_path($mypath);
+       if ($mypath =~ /^[A-Za-z]:/) {$mypath =~ s@[^\\]+$@@; } else {$mypath =~ s@[^/]+$@@;}
+     }
+use lib "$mypath";
+use ceteprouts;
+
+while ( @ARGV > 0 &&  $ARGV[0] =~ /^-/) {
+  $flag =  shift @ARGV;
+  if ( $flag eq "-b" && $#ARGV > 5 ) {
+    while ($#box < 5 ) {
+      push @box, shift @ARGV;
+    }
+  }
+  if ( $flag eq "-s"  ) {
+    $shells = shift @ARGV;
+  }
+}
+
+ReadXTL (\@a, \@b, \@c, \@atomx, \@atomy, \@atomz, \@atyi, \$spgr, \$title);
+
+if (@box > 0) {	
+    @shiftlist = ExpandedCell (\@atomx, \@atomy, \@atomz, \@atyi, \@box);
+    Expand(\@atomx, \@atomy, \@atomz, \@atyi, \@shiftlist,
+	   \@atomxe, \@atomye, \@atomze, \@atyie);
+    ReBox(\@a, \@b, \@c, \@atomxe, \@atomye, \@atomze, \@box);
+    WriteCSSR (\@a, \@b, \@c, \@atomxe, \@atomye, \@atomze, \@atyie);
+} else {
+    WriteCSSR (\@a, \@b, \@c, \@atomx, \@atomy, \@atomz, \@atyi);
+}

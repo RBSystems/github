@@ -1,0 +1,34 @@
+#! /bin/bash
+
+#PBS -A sns
+#PBS -q batch
+#PBS -m ea
+#PBS -M zjyx147@foxmail.com
+#PBS -j oe
+#PBS -o oe.$PBS_JOBID
+#PBS -l qos=std
+#PBS -W group_list=cades-virtues
+#PBS -l walltime=10:00:00
+#PBS -l nodes=1:ppn=4
+#PBS -N GeTe.phband
+
+module load PE-intel
+module load mkl
+module load openmpi
+module list
+
+export OMP_NUM_THREADS=1
+
+cd $PBS_O_WORKDIR
+
+date
+
+alm_in=phband.in
+alm_out=phband.out
+alm_exe=/home/z8j/softwares/alamode-1.0.2/anphon/anphon
+#mpirun -np 1 --bind-to none --map-by ppr:32:node:pe=1 /home/z8j/softwares/alamode/alm/alm $alm_in > $alm_out
+#mpirun -np 1 --map-by ppr:1:node:pe=32  /home/z8j/softwares/alamode/anphon/anphon $alm_in > $alm_out
+mpirun -np 4 --map-by ppr:4:node:pe=1 $alm_exe $alm_in > $alm_out
+wait
+
+date
