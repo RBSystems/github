@@ -5,6 +5,8 @@
 qe_run_trash="
 qe*out*
 *.o*[0-9]*
+oe.*
+*.out
 runenv.*[0-9]*
 core
 input_tmp.in

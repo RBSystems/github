@@ -1,8 +1,7 @@
 #! /bin/bash
 
-function exe_titan()
-{
-all_users=z8j,timmy,yqcheng,chenwli,wenchang,apandey,ztwang2
+user=z8j
+all_users=z8j,timmy,yqcheng,chenwli,wenchang
 lastline=`qstat -u ${all_users} | wc -l`
 
 qstat -u ${all_users}
@@ -45,16 +44,4 @@ qstat -u ${all_users} | awk -v lastline="$lastline" -v user="$user" '
          printf"--------------------------------------------------\n\n"
     }'
 #qstat -u z8j,yyc | awk 'NR>5{printf"%10d\n",$7}
-}
 
-function exe_summit()
-{
-bjobs -u CHM147
-}
-
-user=z8j
-if [ `hostname | grep login` ]; then
-    exe_summit;
-elif [ `hostname | grep titan` ]; then
-    exe_titan;
-fi
