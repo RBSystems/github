@@ -9,12 +9,11 @@
 #PBS -l qos=std
 #PBS -W group_list=cades-virtues
 #PBS -l walltime=10:00:00
-#PBS -l nodes=1:ppn=32
-#PBS -N Carb.climax
+#PBS -l nodes=1:ppn=8
+#PBS -N ZrH2.climax
 
 module load PE-intel/1.0
 module load mkl
-module load anaconda2
 #module load openmpi
 module list
 
@@ -24,18 +23,20 @@ cd $PBS_O_WORKDIR
 
 date
 
-seed=Carb
+rm out_* *out
 
-echo -e "evec2yaml.py...\n"
-~/github-ncsu/personal/alamode/evec2yaml.py $seed
+sed -i "s/points/atoms/g" mesh.yaml
 
-echo -e "2climax.py...\n"
-~/bin/2climax.py -yaml $seed.yaml
+echo -e "Running 2climax.py...\n"
+~/bin/2climax.py -yaml mesh.yaml
 
-echo -e "oclimax.mpi...\n"
-mpirun -np 32 --map-by ppr:32:node:pe=1 ~/bin/oclimax.mpi out.aclimax
+sed -i "s/MAXWN.*/MAXWN = 10000/g" out.params
+#sed -i "s/MAXE.*/MAXE = 10000/g" default.params
 
-~/github-ncsu/personal/climax/csv2dat.py *csv
+echo -e "Running oclimax...\n"
+mpirun -np 8 --map-by ppr:8:node:pe=1 ~/bin/oclimax.mpi out.aclimax out.params
+
+~/github/personal/climax/csv2dat.py *csv
 
 wait
 

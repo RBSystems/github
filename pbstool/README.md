@@ -1,9 +1,9 @@
 # Program: PBSTOOL
     create and submit pbs files for RMG/qe, etc. save run configurations in separate files
-    zjyx, 2017/02@ORNL
+    by zjyx, 2017/02@ORNL
 
 # TODO:
-    1. Add self check process after job finishes; if anything wrong, print it out to WARNING
+    1. Add self check process when job is done; if anything is wrong, print it out to WARNING
 
 # USAGE:
     pbstool ($pbs.conf file)

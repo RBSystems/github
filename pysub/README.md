@@ -1,1 +1,4 @@
-submit jobs if limitation is not violated
+# Program: pysub
+## Usage: pysub [qsub.conf]
+## Description:
+### Submit select job files under current directory.

@@ -322,7 +322,7 @@ class PbsIn():
 
 if __name__ == "__main__":
 
-    pbs_conf = {"file_pbs": "pbs.sh",
+    pbs_conf = {"file_pbs": "pbs.vasp",
                 "exclude": None,
                 "name_log": "log.pbs",
                 "max_nodes": -1,
@@ -401,6 +401,7 @@ if __name__ == "__main__":
 
         # check if there are jobs hold or queued by others
         others_blocked = checkOthers()
+        '''
         while others_blocked:
             time_tmp = time.strftime(time_format, time.localtime())
             sleep_msg = ("%s@%s: There are jobs blocked owned by others. Sleeping for [%4d] secs..."
@@ -409,6 +410,7 @@ if __name__ == "__main__":
             os.system("echo %s >> %s"%(sleep_msg, file_log))
             time.sleep(pbs_conf['sleep']) 
             others_blocked = checkOthers()
+        '''
 
         # decide which limitation case
         limit_case = 0 # no limit

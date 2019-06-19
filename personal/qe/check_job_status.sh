@@ -1,7 +1,7 @@
 #! /bin/bash
 
 done_signal=DONE
-log_file=qe.00.out
+log_file=*out
 my_pwd=`pwd`
 
 all_dir=`ls -l | egrep '^d' | awk '{print $9}'`

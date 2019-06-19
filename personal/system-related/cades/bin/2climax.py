@@ -277,7 +277,7 @@ def get_mesh_yaml(file_mesh_yaml):
         line = f.readline()
         qw[iq][0:3] = map(float,re.findall(r"[-+]?\d*\.\d+|\d+", line))
         line = f.readline()
-        #line = f.readline()
+        line = f.readline()
         qw[iq][3] = float(line.split()[1])/float(qtot)
         f.readline()
         for ib in range(nb):

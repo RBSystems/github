@@ -28,15 +28,16 @@ elif [[ $comp_domain == *'titan'* ]]; then
     #cp CMakeLists.txt CMakeLists.txt.old
     #cat CMakeLists.txt.old | sed 's/project (RMG C CXX Fortran)/project (RMG)/g' | sed '20a # only applicable for ORNL Titan, comment it otherwise\set(CMAKE_Fortran_COMPILER "/opt/cray/craype/2.5.5/bin/ftn")' > CMakeLists.txt
 elif [[ $comp_domain == *'or-condo'* ]]; then
-    module load PE-gnu
+    #module load PE-gnu
+    module load PE-intel
     module load cmake/3.6.1
     module load openmpi
     module load mkl
-    module load hdf5-parallel
+    #module load hdf5-parallel
     module load zlib
     module load fftw
     module load xalt
-    module load gcc
+    #module load gcc
 fi
 
 # remove previous log files
@@ -96,6 +97,6 @@ if [ $? -eq 0 ]; then
     make -j 32 epw 2>&1 | tee -a $log_file
 fi
 
-echo "\nCompilation done.\n"
+echo -e "\nCompilation done.\n"
 
 exit 0

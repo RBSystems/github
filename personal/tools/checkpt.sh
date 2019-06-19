@@ -7,6 +7,7 @@ function createKPT()
         mkdir $dir_name
     fi
     cp POTCAR POSCAR INCAR pbs.vasp $dir_name;
+    sed -i "s/null/$i/g" $dir_name/pbs.vasp;
     cat > $dir_name/KPOINTS <<EOF
 Automatic generation
 0
@@ -19,14 +20,14 @@ EOF
 function getEnergy()
 {
     nkpt=$1
-    E=`grep "TOTEN" kpt-$i/OUTCAR | tail -1 | awk '{printf "%12.6f \n", $5 }'`#
+    E=`grep "TOTEN" kpt-$i/OUTCAR | tail -1 | awk '{printf "%12.6f \n", $5 }'`
     KP=`grep "irreducible" kpt-$i/OUTCAR | tail -1 | awk '{printf "%5i \n", $2 }'`
     echo $nkpt $KP $E >> result
 }
 
-for i in 1 2 3 4 5 6 7
+for i in {1..15}
 do
 echo "k mesh = $i x $i x $i";
-createKPT $i
-#getEnergy $i
+#createKPT $i
+getEnergy $i
 done

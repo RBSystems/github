@@ -1,7 +1,7 @@
 #! /bin/bash
 
 done_signal=TIMING
-log_file=supercell.in.00.log
+log_file=*log
 my_pwd=`pwd`
 
 all_dir=`ls -l | egrep '^d' | awk '{print $9}'`
